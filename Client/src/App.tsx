@@ -1,27 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {
-  AppBar,
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  Grid,
-  Tab,
-  Tabs,
-  Typography
-} from "@material-ui/core";
+import { AppBar, Button, Grid, Tab, Tabs, Typography } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
-import Cookies from "universal-cookie";
 import "./App.css";
-import { Entity } from "./model/interface";
 import {
   EntityTable,
+  Evaluation,
+  Info,
   InsertMask,
-  LoginPage,
-  Organizer,
   PageNotFound
 } from "./sites";
 import { ApplicationState } from "./store";
@@ -37,33 +25,6 @@ function a11yProps(index: number) {
     id: `nav-${index}`,
     "aria-controls": `navtabs-${index}`
   };
-}
-
-function LoginButton(props: { referent: string; onClickHandler(): void }) {
-  if (props.referent === "") return <div />;
-
-  return (
-    <>
-      <Typography
-        style={{
-          marginTop: "12px",
-          marginLeft: "auto",
-          marginRight: "1em"
-        }}
-        component="span"
-      >
-        Eingeloggt als: {props.referent}
-      </Typography>
-
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={props.onClickHandler}
-      >
-        Ausloggen
-      </Button>
-    </>
-  );
 }
 
 function App() {
@@ -82,48 +43,32 @@ function App() {
   );
 
   const [link, setLink] = useState<string>("");
-  const [entities, setEntities] = useState<Entity[]>([]);
-
-  const cookies = new Cookies();
 
   React.useEffect(() => {
-    const cookie = cookies.get("page");
-    if (cookie !== undefined && cookie !== "undefined") {
-      dispatcher.setPageId(cookie.pageId);
-      dispatcher.setReferent(cookie.referent);
-    } else {
-      setLink("/login");
-    }
+    dispatcher.setReferent("Einkauf");
+    if (document.URL == "/") setLink(`/entities/5f44f958069d750700ca930c`);
   }, []);
-
-  React.useEffect(() => {
-    if (!pageId || pageId === "") return;
-    dispatcher.getData(pageId);
-  }, [pageId]);
-
-  React.useEffect(() => {
-    if (page) {
-      setEntities(page.entities);
-    }
-  }, [page]);
 
   React.useEffect(() => {
     if (link !== "") setLink("");
   }, [link]);
 
-  const onChangeTabs = (event: React.ChangeEvent<{}>, newValue: any) => {
+  const onChangeTabs = (_: React.ChangeEvent<{}>, newValue: any) => {
     switch (newValue) {
       case 0:
-        setLink(`/`);
+        setLink(`/entities/5f44f958069d750700ca930c`);
         break;
 
       case 1:
-        if (!page) break;
-        setLink(`/organizer/${page._id}`);
+        setLink(`/evaluation`);
+        break;
+
+      case 2:
+        setLink(`/info`);
         break;
 
       default:
-        setLink(`/`);
+        setLink(`/entities/5f44f958069d750700ca930c`);
         break;
     }
     dispatcher.setTabValue(newValue);
@@ -135,57 +80,22 @@ function App() {
       <AppBar position="static" style={{ marginTop: 0, marginBottom: "2em" }}>
         <Tabs value={tabValue} onChange={onChangeTabs} aria-label="navtabs">
           <Tab label="Home" {...a11yProps(0)} />
-          <Tab label="Organizer" {...a11yProps(1)} />
-          <LoginButton
-            referent={referent}
-            onClickHandler={() => {
-              const cookies = new Cookies();
-              cookies.remove("page");
-              dispatcher.setReferent("");
-              setLink("/login");
-            }}
-          />
+          {/* <Tab label="Auswertung" {...a11yProps(1)} />
+          <Tab label="Ansprechpartner" {...a11yProps(2)} /> */}
         </Tabs>
       </AppBar>
       <LC link={link} />
 
       <Grid container direction="column">
         <Switch>
-          <Route exact path="/">
-            <Grid
-              container
-              direction="row"
-              justify="flex-start"
-              alignItems="flex-start"
-              spacing={2}
-            >
-              {entities.map((e) => {
-                return (
-                  <Card key={e._id}>
-                    <CardActionArea
-                      onClick={() => {
-                        setLink(`/entities/${e._id}`);
-                      }}
-                    >
-                      <CardContent>
-                        <Typography variant="h5" component="h2">
-                          {e.label}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                );
-              })}
-            </Grid>
-          </Route>
           <Route exact path="/entities/:entityId" component={EntityTable} />
           <Route
             exact
             path="/entities/:entityId/insert"
             component={InsertMask}
           />
-          <Route path="/organizer/:pageId" component={Organizer} />
-          <Route path="/login" component={LoginPage} />
+          <Route path="/evaluation" component={Evaluation} />
+          <Route path="/info" component={Info} />
           <Route path="*" component={PageNotFound} />
         </Switch>
       </Grid>

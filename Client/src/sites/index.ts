@@ -1,7 +1,9 @@
 import InsertMask from "./insertMask";
 import EntityTable from "./entityTable";
-import Organizer from "./organizer";
+// import Organizer from "./organizer";
 import PageNotFound from "./pageNotFound";
-import LoginPage from "./login";
+// import LoginPage from "./login";
+import Evaluation from "./evaluation";
+import Info from "./info";
 
-export { InsertMask, EntityTable, Organizer, PageNotFound, LoginPage };
+export { InsertMask, EntityTable, PageNotFound, Evaluation, Info };
