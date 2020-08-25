@@ -1,0 +1,4 @@
+*/dist/*
+*/node_modules/*
+package-lock.json
+Server/src/config/db.json
