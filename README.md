@@ -1,7 +1,7 @@
 # Datenbank
 
 Notwendig ist eine Instanz eines MongoDB-Servers.
-Die Adresse des der Instanz muss in der `db.json` des Servers aktualisiert werden.-
+Die Adresse des der Instanz muss in der `db.json` des Servers aktualisiert werden. Diese wird generiert, wenn der Server das erste Mal ausgeführt wird.
 
 # Client
 
