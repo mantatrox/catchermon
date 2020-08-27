@@ -13,11 +13,9 @@ import React from "react";
 import {
   DistributionStatus,
   Entity,
-  PropertyType,
-  EntityObject
+  PropertyType
 } from "../../model/interface";
 import { SimpleComponents } from "../index";
-import { Redirect } from "react-router-dom";
 
 const DrawProps = (props: { item: string; entity?: Entity }) => {
   if (!props.entity || props.item === "") return <div />;

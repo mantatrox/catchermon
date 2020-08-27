@@ -1,4 +1,4 @@
-import { call, put, select, takeLatest, all } from "redux-saga/effects";
+import { call, put, select, takeLatest } from "redux-saga/effects";
 import { ApplicationState } from "..";
 import {
   Entity,

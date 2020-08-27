@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { AppBar, Button, Grid, Tab, Tabs, Typography } from "@material-ui/core";
+import { AppBar, Grid, Tab, Tabs } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
@@ -31,16 +31,11 @@ function App() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
-  const { page, tabValue, referent, pageId } = useSelector(
-    (state: ApplicationState) => {
-      return {
-        page: state.io.page,
-        tabValue: state.io.tabValue,
-        referent: state.io.referent,
-        pageId: state.io.pageId
-      };
-    }
-  );
+  const { tabValue } = useSelector((state: ApplicationState) => {
+    return {
+      tabValue: state.io.tabValue
+    };
+  });
 
   const [link, setLink] = useState<string>("");
 

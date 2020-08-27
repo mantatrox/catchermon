@@ -2,18 +2,18 @@
 
 import {
   Button,
+  Chip,
   CircularProgress,
   Grid,
   TextField,
-  Typography,
-  Paper,
-  Chip
+  Typography
 } from "@material-ui/core";
+import { CheckBox, CheckBoxOutlineBlank } from "@material-ui/icons";
 import moment from "moment";
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams, Redirect } from "react-router-dom";
+import { Link, Redirect, useParams } from "react-router-dom";
 import { TableComponents } from "../components";
 import {
   DistributionStatus,
@@ -24,7 +24,6 @@ import {
 } from "../model/interface";
 import { ApplicationState } from "../store";
 import { dispatcher as IoDispatcher } from "../store/io";
-import { CheckBox, CheckBoxOutlineBlank } from "@material-ui/icons";
 
 function RT(props: { link?: string }) {
   if (props.link && props.link !== "") return <Redirect to={props.link} />;
@@ -80,7 +79,6 @@ const EntityTable = () => {
   const [cols, setCols] = useState([] as any);
   const [data, setData] = useState([] as any);
   const [filtered, setFiltered] = useState([] as any);
-  const [searched, setSearched] = useState([] as any);
 
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +86,6 @@ const EntityTable = () => {
   const [selectedObjectId, setSelectedObjectId] = useState("");
   const [link, setLink] = useState("");
 
-  const [filter, setFilter] = useState("");
   const [chips, setChips] = useState<ChipData[]>([]);
   const [chipText, setChipText] = useState("");
 
@@ -109,7 +106,6 @@ const EntityTable = () => {
     const d = getData();
     setData(d);
     setFiltered(d);
-    setSearched(d);
   }, [entity]);
 
   React.useEffect(() => {
@@ -133,59 +129,22 @@ const EntityTable = () => {
       return;
     }
 
-    const filteredObjects = data.filter((rowObject: any) => {
-      let check = false;
+    let toFilter = [...data];
 
-      for (const prop of fProps) {
-        if (
-          chips
-            .map((chip) => chip.label.toLowerCase())
-            .includes(rowObject.properties[prop.name].toLowerCase())
-        ) {
-          check = true;
-          break;
-        }
-      }
-      return check;
-    });
+    for (const chip of chips) {
+      toFilter = toFilter.filter((rowObject: any) => {
+        return fProps
+          .map((prop) => {
+            return rowObject.properties[prop.name];
+          })
+          .some((value: string) =>
+            value.toLowerCase().includes(chip.label.toLowerCase())
+          );
+      });
+    }
 
-    setFiltered(filteredObjects);
+    setFiltered(toFilter);
   }, [chips]);
-
-  React.useEffect(() => {
-    if (filter === "") {
-      setSearched(filtered);
-      return;
-    }
-
-    const fProps = entity?.properties.filter(
-      (p) => !entity.options.hiddenProperties.includes(p.name)
-    );
-
-    if (!fProps) {
-      setSearched(filtered);
-      return;
-    }
-
-    const searchedObjects = filtered.filter((rowObject: any) => {
-      let check = false;
-
-      for (const prop of fProps) {
-        if (
-          rowObject.properties[prop.name]
-            .toLowerCase()
-            .includes(filter.toLowerCase())
-        ) {
-          check = true;
-          break;
-        }
-      }
-
-      return check;
-    });
-
-    setSearched(searchedObjects);
-  }, [filtered, filter]);
 
   React.useEffect(() => {
     if (data.length > 0 && cols.length > 0) setLoading(false);
@@ -307,7 +266,7 @@ const EntityTable = () => {
           </Button>
         </Grid>
 
-        <Grid item xs={3}>
+        <Grid item xs={11}>
           <Grid container direction="column">
             <Typography
               variant="h5"
@@ -324,10 +283,19 @@ const EntityTable = () => {
               onChange={(event) => {
                 setChipText(event.target.value);
               }}
+              style={{
+                width: "100%"
+              }}
               value={chipText}
               onKeyUp={(event) => {
-                const possibleKeys = ["Enter", "Tab", " "];
+                const possibleKeys = ["Enter", "Tab", " ", "Backspace"];
                 if (!possibleKeys.includes(event.key)) return;
+
+                if (event.key === "Backspace" && chipText === "") {
+                  const nc = chips.slice(0, chips.length - 1);
+                  setChips(nc);
+                  return;
+                }
 
                 const newChip = chipText.trim();
                 if (newChip === "") return;
@@ -340,60 +308,40 @@ const EntityTable = () => {
               }}
             />
           </Grid>
-        </Grid>
-        <Grid item xs={4}>
-          <Paper
+          <Grid
             component="ul"
             style={{
-              display: "flex",
-              justifyContent: "center",
-              flexWrap: "wrap",
               listStyle: "none",
-              margin: "0.5em"
+              margin: 0,
+              padding: 0,
+              width: "max-content"
             }}
+            direction="row"
+            container
           >
             {chips.map((chip) => {
               return (
-                <li key={chip.key}>
+                <Grid item component="li" key={chip.key}>
                   <Chip
-                    style={{ margin: "0.2em" }}
+                    style={{ margin: "0.5em" }}
                     label={chip.label}
                     onDelete={() => {
                       const nc = chips.filter((c) => c.key !== chip.key);
                       setChips(nc);
                     }}
+                    size="small"
                   />
-                </li>
+                </Grid>
               );
             })}
-          </Paper>
-        </Grid>
-        <Grid item xs={4}>
-          <Grid container>
-            <Typography
-              variant="h5"
-              style={{
-                marginRight: "0.2em",
-                marginTop: "0.4em"
-              }}
-            >
-              Suche:
-            </Typography>
-            <TextField
-              variant="outlined"
-              value={filter}
-              onChange={(event) => {
-                setFilter(event.target.value);
-              }}
-              size="small"
-            />
           </Grid>
         </Grid>
       </Grid>
+
       <DataTable
         title={entity?.label}
         columns={cols}
-        data={searched}
+        data={filtered}
         highlightOnHover
         onRowClicked={(item: EntityObject) => {
           if (!item._id) return;
