@@ -29,6 +29,7 @@ function Draw(props: {
           lp={props.property as ListProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 

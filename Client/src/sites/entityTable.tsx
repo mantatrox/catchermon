@@ -295,7 +295,7 @@ const EntityTable = () => {
                   const nc = chips.slice(0, chips.length - 1);
                   setChips(nc);
                   return;
-                }
+                } else if (event.key === "Backspace" && chipText !== "") return;
 
                 const newChip = chipText.trim();
                 if (newChip === "") return;

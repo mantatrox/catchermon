@@ -14,8 +14,13 @@ const ListElem = (props: {
   lp: ListProp;
   solutions: StateReturn[];
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) => {
   const [values, setValues] = useState<string[]>([]);
+
+  React.useEffect(() => {
+    if (props.value) setValues([props.value]);
+  }, [props.value]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setValues(event.target.value as string[]);
@@ -38,7 +43,12 @@ const ListElem = (props: {
   const singleSelect = (
     <FormControl required={props.lp.required}>
       <InputLabel>{props.lp.label}</InputLabel>
-      <Select labelId={props.lp.label} id={"Select"} onChange={handleChange}>
+      <Select
+        labelId={props.lp.label}
+        id={"Select"}
+        onChange={handleChange}
+        value={values}
+      >
         {props.lp.items.map((item) => {
           return (
             <MenuItem value={item} key={item}>
