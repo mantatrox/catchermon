@@ -14,6 +14,7 @@ router.put("/entities/:pageId", entities.create);
 router.post("/entities", entities.update);
 
 router.put("/objects", objects.create);
+router.post("/objects", objects.update);
 router.post("/objects/deliver", objects.deliver);
 router.post("/objects/book", objects.book);
 router.post("/objects/remove", objects.remove);
