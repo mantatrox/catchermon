@@ -45,7 +45,11 @@ enum actions {
 
   ClearStart = "IO_CLEAR_START",
   ClearSuccess = "IO_CLEAR_SUCCESS",
-  ClearError = "IO_CLEAR_ERROR"
+  ClearError = "IO_CLEAR_ERROR",
+
+  UpdateObjectStart = "IO_UPDATE_OBJECT_START",
+  UpdateObjectSuccess = "IO_UPDATE_OBJECT_SUCCESS",
+  UpdateObjectError = "IO_UPDATE_OBJECT_ERROR"
 }
 
 export default actions;

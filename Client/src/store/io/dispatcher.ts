@@ -1,7 +1,12 @@
 import { Dispatch } from "redux";
 import actions from "./actions";
 import { DispatchAction } from "./reducer";
-import { StateReturn, Property, Entity } from "../../model/interface";
+import {
+  StateReturn,
+  Property,
+  Entity,
+  EntityObject
+} from "../../model/interface";
 
 export default function dispatcher(dispatch: Dispatch<DispatchAction>) {
   function getData(pageId = "") {
@@ -73,6 +78,13 @@ export default function dispatcher(dispatch: Dispatch<DispatchAction>) {
     });
   }
 
+  function updateObject(entObj: EntityObject) {
+    dispatch({
+      type: actions.UpdateObjectStart,
+      payload: { newObject: entObj }
+    });
+  }
+
   return {
     getData,
     getEntity,
@@ -88,6 +100,7 @@ export default function dispatcher(dispatch: Dispatch<DispatchAction>) {
     deliver,
     book,
     remove,
-    clear
+    clear,
+    updateObject
   };
 }

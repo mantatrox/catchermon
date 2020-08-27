@@ -13,9 +13,11 @@ import React from "react";
 import {
   DistributionStatus,
   Entity,
-  PropertyType
+  PropertyType,
+  EntityObject
 } from "../../model/interface";
 import { SimpleComponents } from "../index";
+import { Redirect } from "react-router-dom";
 
 const DrawProps = (props: { item: string; entity?: Entity }) => {
   if (!props.entity || props.item === "") return <div />;
@@ -67,6 +69,7 @@ const Simple = (props: {
   open: boolean;
   closeHandler(state: boolean): void;
   deleteHandler(objectId: string): void;
+  editHandler(objectId: string): void;
 }) => {
   if (!props.entity) return null;
   const obj = props.entity.items.find((i) => i._id === props.selectedObjectId);
@@ -79,6 +82,15 @@ const Simple = (props: {
   const actions =
     obj.referent === props.referent ? (
       <>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            props.editHandler(props.selectedObjectId);
+          }}
+        >
+          Bearbeiten
+        </Button>
         <Button
           variant="contained"
           color="secondary"

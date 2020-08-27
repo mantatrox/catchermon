@@ -46,7 +46,8 @@ function App() {
 
   React.useEffect(() => {
     dispatcher.setReferent("Einkauf");
-    if (document.URL == "/") setLink(`/entities/5f44f958069d750700ca930c`);
+    console.log(document.URL);
+    setLink(`/sieb/entities/5f44f958069d750700ca930c`);
   }, []);
 
   React.useEffect(() => {
@@ -56,19 +57,19 @@ function App() {
   const onChangeTabs = (_: React.ChangeEvent<{}>, newValue: any) => {
     switch (newValue) {
       case 0:
-        setLink(`/entities/5f44f958069d750700ca930c`);
+        setLink(`/sieb/entities/5f44f958069d750700ca930c`);
         break;
 
       case 1:
-        setLink(`/evaluation`);
+        setLink(`/sieb/evaluation`);
         break;
 
       case 2:
-        setLink(`/info`);
+        setLink(`/sieb/info`);
         break;
 
       default:
-        setLink(`/entities/5f44f958069d750700ca930c`);
+        setLink(`/sieb/entities/5f44f958069d750700ca930c`);
         break;
     }
     dispatcher.setTabValue(newValue);
@@ -88,14 +89,24 @@ function App() {
 
       <Grid container direction="column">
         <Switch>
-          <Route exact path="/entities/:entityId" component={EntityTable} />
           <Route
             exact
-            path="/entities/:entityId/insert"
+            path="/sieb/entities/:entityId"
+            component={EntityTable}
+          />
+          <Route
+            exact
+            path="/sieb/entities/:entityId/insert"
             component={InsertMask}
           />
-          <Route path="/evaluation" component={Evaluation} />
-          <Route path="/info" component={Info} />
+
+          <Route
+            path="/sieb/entities/:entityId/insert/:objectId"
+            component={InsertMask}
+          />
+
+          <Route path="/sieb/evaluation" component={Evaluation} />
+          <Route path="/sieb/info" component={Info} />
           <Route path="*" component={PageNotFound} />
         </Switch>
       </Grid>

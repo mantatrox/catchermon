@@ -6,18 +6,18 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { InsertComponent } from "../components";
-import { PropertyType } from "../model/interface";
+import { PropertyType, EntityObject, Property } from "../model/interface";
 import { ApplicationState } from "../store";
 import { dispatcher as IoDispatcher } from "../store/io";
 
 function RT(props: { entityId?: string }) {
   if (props.entityId && props.entityId !== "")
-    return <Redirect to={`/entities/${props.entityId}`} />;
+    return <Redirect to={`/sieb/entities/${props.entityId}`} />;
   else return <div />;
 }
 
 function InsertMask() {
-  const { entityId } = useParams();
+  const { entityId, objectId } = useParams();
 
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
@@ -33,6 +33,14 @@ function InsertMask() {
   );
 
   const [redId, setRedId] = useState<string>("");
+  const [obj, setObj] = useState<EntityObject | undefined>();
+
+  React.useEffect(() => {
+    if (objectId && obj?._id !== objectId) {
+      const o = entity?.items.find((i) => i._id === objectId);
+      if (o && obj !== o) setObj(o);
+    }
+  }, [objectId]);
 
   React.useEffect(() => {
     dispatcher.getEntity(entityId);
@@ -46,7 +54,15 @@ function InsertMask() {
   }, [insertSuccess]);
 
   const onClickHandler = () => {
-    if (check()) dispatcher.createObject();
+    if (check())
+      if (obj === undefined) dispatcher.createObject();
+      else {
+        const tempo = { ...obj };
+        tempo.properties = solutions.map((s) => {
+          return { propKey: s.propName, propValue: s.values[0] };
+        });
+        dispatcher.updateObject(tempo);
+      }
     else console.log("nöp");
   };
 
@@ -108,6 +124,20 @@ function InsertMask() {
     return true;
   };
 
+  function getValue(prop: Property, obj?: EntityObject) {
+    try {
+      if (obj === undefined) return undefined;
+      const entProp = obj.properties.find((o) => o.propKey === prop.name);
+      if (entProp === undefined) return undefined;
+      const v = entProp.propValue.toString();
+      return v;
+    } catch (error) {
+      console.log(error);
+      console.log(prop.name);
+      return undefined;
+    }
+  }
+
   return (
     <div className="container">
       <RT entityId={redId} />
@@ -122,6 +152,7 @@ function InsertMask() {
                 setHandler={(solutions) => {
                   dispatcher.setSolutions(solutions);
                 }}
+                value={getValue(p, obj)}
               />
             </FormControl>
           );

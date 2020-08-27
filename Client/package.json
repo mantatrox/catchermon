@@ -2,7 +2,7 @@
   "name": "kram",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://auent14.aue.helios-kliniken.de/",
+  "homepage": "http://auent13.aue.helios-kliniken.de/sieb/",
   "dependencies": {
     "@date-io/moment": "^1.3.13",
     "@hapi/joi": "^17.1.1",

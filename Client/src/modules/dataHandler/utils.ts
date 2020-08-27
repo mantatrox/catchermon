@@ -1,34 +1,26 @@
-const postOptions = (body: unknown): RequestInit => {
+const fetchOptions = (method: string, body?: unknown): RequestInit => {
   return {
-    method: "POST",
+    method,
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      pragma: "no-cache",
+      "cache-control": "no-cache"
     },
-    body: JSON.stringify(body)
-  };
-};
-
-const putOptions = (body: unknown): RequestInit => {
-  return {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
+    body: body ? JSON.stringify(body) : undefined
   };
 };
 
 const getter = async <T>(url: string) => {
-  const response = await fetch(url);
+  const response = await fetch(url, fetchOptions("GET"));
   return (await response.json()).data as T;
 };
 
 const poster = async (url: string, body: unknown) => {
-  return await fetch(url, postOptions(body));
+  return await fetch(url, fetchOptions("POST", body));
 };
 
 const putter = async (url: string, body: unknown) => {
-  return await fetch(url, putOptions(body));
+  return await fetch(url, fetchOptions("PUT", body));
 };
 
 export { getter, poster, putter };

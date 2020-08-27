@@ -1,4 +1,4 @@
-import { call, put, select, takeLatest } from "redux-saga/effects";
+import { call, put, select, takeLatest, all } from "redux-saga/effects";
 import { ApplicationState } from "..";
 import {
   Entity,
@@ -213,6 +213,22 @@ const objects = {
 
     if (response.status === 204) yield put({ type: actions.RemoveSuccess });
     else yield putError(actions.RemoveError, response);
+  },
+
+  update: function* (action: DispatchAction) {
+    const entObj = action.payload.newObject;
+
+    if (!entObj) {
+      yield putError(actions.UpdateObjectError, new Error("No object given"));
+      return;
+    }
+
+    const result = yield call(dataHandler.objects.update, entObj);
+    const response = result as Response;
+
+    if (response.status === 204)
+      yield put({ type: actions.UpdateObjectSuccess });
+    else yield putError(actions.UpdateObjectError, response);
   }
 };
 
@@ -229,6 +245,7 @@ function* saga() {
   yield takeLatest(actions.BookStart, objects.book);
   yield takeLatest(actions.RemoveStart, objects.remove);
   yield takeLatest(actions.ClearStart, objects.clear);
+  yield takeLatest(actions.UpdateObjectStart, objects.update);
 }
 
 export default saga;

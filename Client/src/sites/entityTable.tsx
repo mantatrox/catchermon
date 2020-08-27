@@ -1,11 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { Button } from "@material-ui/core";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  TextField,
+  Typography,
+  Paper,
+  Chip
+} from "@material-ui/core";
 import moment from "moment";
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, Redirect } from "react-router-dom";
 import { TableComponents } from "../components";
 import {
   DistributionStatus,
@@ -17,6 +25,11 @@ import {
 import { ApplicationState } from "../store";
 import { dispatcher as IoDispatcher } from "../store/io";
 import { CheckBox, CheckBoxOutlineBlank } from "@material-ui/icons";
+
+function RT(props: { link?: string }) {
+  if (props.link && props.link !== "") return <Redirect to={props.link} />;
+  return null;
+}
 
 const condStyle = (referent: string, entity?: Entity) => {
   if (!entity || !entity.options.useConditionalFormatting) return [];
@@ -59,19 +72,44 @@ const EntityTable = () => {
     }
   );
 
+  interface ChipData {
+    key: number;
+    label: string;
+  }
+
   const [cols, setCols] = useState([] as any);
   const [data, setData] = useState([] as any);
+  const [filtered, setFiltered] = useState([] as any);
+  const [searched, setSearched] = useState([] as any);
+
+  const [loading, setLoading] = useState(true);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedObjectId, setSelectedObjectId] = useState("");
+  const [link, setLink] = useState("");
+
+  const [filter, setFilter] = useState("");
+  const [chips, setChips] = useState<ChipData[]>([]);
+  const [chipText, setChipText] = useState("");
+
+  React.useEffect(() => {
+    setLoading(true);
+  }, []);
 
   React.useEffect(() => {
     dispatcher.getEntity(entityId);
   }, [entityId]);
 
   React.useEffect(() => {
+    if (link !== "") setLink("");
+  }, [link]);
+
+  React.useEffect(() => {
     setCols(getColumns());
-    setData(getData());
+    const d = getData();
+    setData(d);
+    setFiltered(d);
+    setSearched(d);
   }, [entity]);
 
   React.useEffect(() => {
@@ -80,6 +118,78 @@ const EntityTable = () => {
       window.location.reload();
     }
   }, [insertSuccess]);
+
+  React.useEffect(() => {
+    if (chips.length === 0) {
+      setFiltered(data);
+      return;
+    }
+    const fProps = entity?.properties.filter(
+      (p) => !entity.options.hiddenProperties.includes(p.name)
+    );
+
+    if (!fProps) {
+      setFiltered(data);
+      return;
+    }
+
+    const filteredObjects = data.filter((rowObject: any) => {
+      let check = false;
+
+      for (const prop of fProps) {
+        if (
+          chips
+            .map((chip) => chip.label.toLowerCase())
+            .includes(rowObject.properties[prop.name].toLowerCase())
+        ) {
+          check = true;
+          break;
+        }
+      }
+      return check;
+    });
+
+    setFiltered(filteredObjects);
+  }, [chips]);
+
+  React.useEffect(() => {
+    if (filter === "") {
+      setSearched(filtered);
+      return;
+    }
+
+    const fProps = entity?.properties.filter(
+      (p) => !entity.options.hiddenProperties.includes(p.name)
+    );
+
+    if (!fProps) {
+      setSearched(filtered);
+      return;
+    }
+
+    const searchedObjects = filtered.filter((rowObject: any) => {
+      let check = false;
+
+      for (const prop of fProps) {
+        if (
+          rowObject.properties[prop.name]
+            .toLowerCase()
+            .includes(filter.toLowerCase())
+        ) {
+          check = true;
+          break;
+        }
+      }
+
+      return check;
+    });
+
+    setSearched(searchedObjects);
+  }, [filtered, filter]);
+
+  React.useEffect(() => {
+    if (data.length > 0 && cols.length > 0) setLoading(false);
+  }, [data, cols]);
 
   const getColumns = () => {
     if (!entity || !entity.options) return [];
@@ -94,11 +204,14 @@ const EntityTable = () => {
         : entity.properties;
 
     const props = filtered.map((item) => {
-      if (item.type === PropertyType.CheckboxProp)
-        return {
-          name: item.label,
-          sortable: true,
-          cell: (row: EntityObject) => {
+      const basic = {
+        name: item.label,
+        selector: `properties.${item.name}`,
+        sortable: true
+      };
+      switch (item.type) {
+        case PropertyType.CheckboxProp:
+          const cell = (row: EntityObject) => {
             const id = row._id;
             if (!id) return null;
 
@@ -108,13 +221,22 @@ const EntityTable = () => {
               ?.propValue;
 
             return value === "true" ? <CheckBox /> : <CheckBoxOutlineBlank />;
-          }
-        };
-      return {
-        name: item.label,
-        selector: `properties.${item.name}`,
-        sortable: true
-      };
+          };
+
+          return { ...basic, cell };
+
+        case PropertyType.DateProp:
+          const sortFunction = (rowA: any, rowB: any) => {
+            const tA = moment(rowA.properties[item.name], "DD.MM.YYYY").unix();
+            const tB = moment(rowB.properties[item.name], "DD.MM.YYYY").unix();
+            return tA - tB;
+          };
+
+          return { ...basic, sortFunction };
+
+        default:
+          return basic;
+      }
     });
 
     if (entity.options.showReferent)
@@ -147,7 +269,10 @@ const EntityTable = () => {
           const def = entity.properties.find((pr) => pr.name === prop.propKey);
           if (!def) continue;
           if (def.type === PropertyType.DateProp) {
-            nP[prop.propKey] = moment(prop.propValue).format("DD.MM.YYYY");
+            nP[prop.propKey] =
+              prop.propValue === ""
+                ? ""
+                : moment(prop.propValue).format("DD.MM.YYYY");
             continue;
           }
           let value = prop.propValue;
@@ -169,17 +294,106 @@ const EntityTable = () => {
 
   return (
     <div className="container">
-      <Button
-        component={Link}
-        to={`/entities/${entityId}/insert`}
-        variant="contained"
-      >
-        +
-      </Button>
+      <RT link={link} />
+
+      <Grid container>
+        <Grid item xs={1}>
+          <Button
+            component={Link}
+            to={`/sieb/entities/${entityId}/insert`}
+            variant="contained"
+          >
+            +
+          </Button>
+        </Grid>
+
+        <Grid item xs={3}>
+          <Grid container direction="column">
+            <Typography
+              variant="h5"
+              style={{
+                marginRight: "0.2em",
+                marginTop: "0.4em"
+              }}
+            >
+              Filter:
+            </Typography>
+            <TextField
+              variant="outlined"
+              size="small"
+              onChange={(event) => {
+                setChipText(event.target.value);
+              }}
+              value={chipText}
+              onKeyUp={(event) => {
+                const possibleKeys = ["Enter", "Tab", " "];
+                if (!possibleKeys.includes(event.key)) return;
+
+                const newChip = chipText.trim();
+                if (newChip === "") return;
+
+                const nc = [...chips];
+                nc.push({ key: chips.length, label: newChip });
+
+                setChips(nc);
+                setChipText("");
+              }}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs={4}>
+          <Paper
+            component="ul"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              listStyle: "none",
+              margin: "0.5em"
+            }}
+          >
+            {chips.map((chip) => {
+              return (
+                <li key={chip.key}>
+                  <Chip
+                    style={{ margin: "0.2em" }}
+                    label={chip.label}
+                    onDelete={() => {
+                      const nc = chips.filter((c) => c.key !== chip.key);
+                      setChips(nc);
+                    }}
+                  />
+                </li>
+              );
+            })}
+          </Paper>
+        </Grid>
+        <Grid item xs={4}>
+          <Grid container>
+            <Typography
+              variant="h5"
+              style={{
+                marginRight: "0.2em",
+                marginTop: "0.4em"
+              }}
+            >
+              Suche:
+            </Typography>
+            <TextField
+              variant="outlined"
+              value={filter}
+              onChange={(event) => {
+                setFilter(event.target.value);
+              }}
+              size="small"
+            />
+          </Grid>
+        </Grid>
+      </Grid>
       <DataTable
         title={entity?.label}
         columns={cols}
-        data={data}
+        data={searched}
         highlightOnHover
         onRowClicked={(item: EntityObject) => {
           if (!item._id) return;
@@ -188,6 +402,13 @@ const EntityTable = () => {
         }}
         keyField={"_id"}
         conditionalRowStyles={condStyle(referent, entity)}
+        progressPending={loading}
+        progressComponent={<CircularProgress />}
+        pagination={true}
+        paginationComponentOptions={{
+          rowsPerPageText: "Reihen pro Seite:"
+        }}
+        noDataComponent="Keine Daten vorhanden"
       />
 
       {entity?.options.type === EntityType.SIMPLE ? (
@@ -201,6 +422,9 @@ const EntityTable = () => {
           }}
           deleteHandler={(objectId) => {
             dispatcher.remove(objectId, referent);
+          }}
+          editHandler={(objectId) => {
+            setLink(`/sieb/entities/${entity._id}/insert/${objectId}`);
           }}
         />
       ) : (
