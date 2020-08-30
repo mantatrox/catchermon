@@ -1,8 +1,6 @@
-import InsertMask from "./insertMask";
+import InsertMask from "./insertMask/insert";
 import EntityTable from "./entityTable";
-// import Organizer from "./organizer";
 import PageNotFound from "./pageNotFound";
-// import LoginPage from "./login";
 import Evaluation from "./evaluation";
 import Info from "./info";
 

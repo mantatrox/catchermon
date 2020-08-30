@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import autoBind from "auto-bind";
+import { StopWatch } from "stopwatch-node";
 
 export interface MCOptions {
   host: string;

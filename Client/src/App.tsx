@@ -38,11 +38,13 @@ function App() {
   });
 
   const [link, setLink] = useState<string>("");
+  const baseUrlRegex = /\/sieb\/?$/;
 
   React.useEffect(() => {
     dispatcher.setReferent("Einkauf");
-    console.log(document.URL);
-    setLink(`/sieb/entities/5f44f958069d750700ca930c`);
+
+    if (document.URL.match(baseUrlRegex))
+      setLink(`/sieb/entities/5f44f958069d750700ca930c`);
   }, []);
 
   React.useEffect(() => {
@@ -76,8 +78,8 @@ function App() {
       <AppBar position="static" style={{ marginTop: 0, marginBottom: "2em" }}>
         <Tabs value={tabValue} onChange={onChangeTabs} aria-label="navtabs">
           <Tab label="Home" {...a11yProps(0)} />
-          {/* <Tab label="Auswertung" {...a11yProps(1)} />
-          <Tab label="Ansprechpartner" {...a11yProps(2)} /> */}
+          <Tab label="Auswertung" {...a11yProps(1)} />
+          {/*<Tab label="Ansprechpartner" {...a11yProps(2)} /> */}
         </Tabs>
       </AppBar>
       <LC link={link} />

@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import Joi from "@hapi/joi";
 import { Button, FormControl, Grid } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
-import { InsertComponent } from "../components";
-import { PropertyType, EntityObject, Property } from "../model/interface";
-import { ApplicationState } from "../store";
-import { dispatcher as IoDispatcher } from "../store/io";
+import { InsertComponent } from "../../components";
+import { EntityObject } from "../../model/interface";
+import { ApplicationState } from "../../store";
+import { dispatcher as IoDispatcher } from "../../store/io";
+import { check, getValue } from "./handlers";
 
 function RT(props: { entityId?: string }) {
   if (props.entityId && props.entityId !== "")
@@ -54,7 +54,8 @@ function InsertMask() {
   }, [insertSuccess]);
 
   const onClickHandler = () => {
-    if (check())
+    if (!entity) return;
+    if (check(entity, solutions))
       if (obj === undefined) dispatcher.createObject();
       else {
         const tempo = { ...obj };
@@ -65,78 +66,6 @@ function InsertMask() {
       }
     else console.log("nöp");
   };
-
-  const check = () => {
-    if (!entity) return false;
-    for (const p of entity.properties) {
-      switch (p.type) {
-        case PropertyType.ListProp:
-          const schemaL = Joi.object({
-            propName: Joi.string().required(),
-            values: p.required
-              ? Joi.array().items(Joi.string()).min(1).required()
-              : Joi.array().items(Joi.string()).min(1)
-          });
-
-          const lp = solutions.find((s) => s.propName === p.name);
-          const { error: errorL } = schemaL.validate(lp);
-          if (errorL) {
-            return false;
-          }
-          break;
-
-        case PropertyType.TextProp:
-          const schemaT = Joi.object({
-            propName: p.required ? Joi.string().required() : Joi.string(),
-            values: p.required
-              ? Joi.array().items(Joi.string()).length(1).required()
-              : Joi.array().items(Joi.string()).max(1)
-          });
-
-          const tp = solutions.find((s) => s.propName === p.name);
-          const { error: errorT } = schemaT.validate(tp);
-          if (errorT) {
-            return false;
-          }
-          break;
-
-        case PropertyType.NumberProp:
-          const schemaN = Joi.object({
-            propName: p.required ? Joi.string().required() : Joi.string(),
-            values: p.required
-              ? Joi.array().items(Joi.string()).length(1).required()
-              : Joi.array().items(Joi.string()).max(1)
-          });
-          const np = solutions.find((s) => s.propName === p.name);
-          const { error: errorN } = schemaN.validate(np);
-          if (errorN) {
-            return false;
-          }
-          break;
-
-        case PropertyType.CheckboxProp:
-          break;
-        default:
-          break;
-      }
-    }
-
-    return true;
-  };
-
-  function getValue(prop: Property, obj?: EntityObject) {
-    try {
-      if (obj === undefined) return undefined;
-      const entProp = obj.properties.find((o) => o.propKey === prop.name);
-      if (entProp === undefined) return undefined;
-      const v = entProp.propValue.toString();
-      return v;
-    } catch (error) {
-      console.log(error);
-      console.log(prop.name);
-      return undefined;
-    }
-  }
 
   return (
     <div className="container">
