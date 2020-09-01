@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
+  Button,
   MenuItem,
   Paper,
   Select,
@@ -10,18 +12,17 @@ import {
   TableHead,
   TableRow
 } from "@material-ui/core";
-import assert from "assert";
-import moment from "moment";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
-
-interface ClinicCounter {
-  clinic: string;
-  counter: number;
-}
+import {
+  calculate,
+  ClinicCounter,
+  exportExcel,
+  getYears,
+  lastOneFat
+} from "./handlers";
 
 function Draw() {
   const dispatch = useDispatch();
@@ -37,6 +38,7 @@ function Draw() {
   const [selectedYear, setSelectedYear] = useState(0);
 
   const [calculation, setCalculation] = useState<ClinicCounter[]>([]);
+  const [disabled, setDisabled] = useState(false);
 
   React.useEffect(() => {
     dispatcher.setTabValue(1);
@@ -47,8 +49,7 @@ function Draw() {
       dispatcher.getEntity("5f44f958069d750700ca930c");
       return;
     }
-
-    setYears(getYears());
+    setYears(getYears(entity));
   }, [entity]);
 
   React.useEffect(() => {
@@ -57,79 +58,12 @@ function Draw() {
   }, [years]);
 
   React.useEffect(() => {
-    calculate();
+    if (!entity) return;
+    calculate(selectedYear, entity, setCalculation);
   }, [selectedYear]);
 
-  function getYears() {
-    if (!entity) return [] as number[];
-    return entity.items
-      .map((item) => {
-        return getItemYear(item);
-      })
-      .filter((v, i, a) => a.indexOf(v) === i && v > 0)
-      .sort((a, b) => b - a);
-  }
-
-  function getItemYear(item: EntityObject) {
-    if (!entity) return -1;
-    const prop = item.properties.find((prop) => prop.propKey === "insertDate");
-    if (!prop) return -1;
-    const val =
-      typeof prop.propValue === "object" ? prop.propValue[0] : prop.propValue;
-
-    const year = moment(val).year();
-    assert.strictEqual(typeof year, "number");
-
-    return year;
-  }
-
-  function getItemClinic(item: EntityObject) {
-    if (!entity) return "";
-    const prop = item.properties.find((prop) => prop.propKey === "clinic");
-    if (!prop) return "";
-
-    return typeof prop.propValue === "object"
-      ? prop.propValue[0]
-      : prop.propValue;
-  }
-
-  function getClinics(): string[] {
-    if (!entity || !entity.items) return [];
-
-    return entity.items
-      .map((item) => {
-        return getItemClinic(item);
-      })
-      .filter((v, i, a) => a.indexOf(v) === i)
-      .sort();
-  }
-
-  function getNumberByClinic(clinic: string) {
-    if (!entity) return -1;
-
-    return entity.items.filter((item) => {
-      const cl = getItemClinic(item);
-      const year = getItemYear(item);
-
-      return cl === clinic && year === selectedYear;
-    }).length;
-  }
-
-  function calculate() {
-    const calcs: ClinicCounter[] = getClinics().map((clinic) => {
-      return { clinic, counter: getNumberByClinic(clinic) };
-    });
-
-    let sum = 0;
-    calcs.forEach((calc) => (sum += calc.counter));
-
-    calcs.push({ clinic: "Gesamt", counter: sum });
-
-    setCalculation(calcs);
-  }
-
   return (
-    <Box style={{ margin: "0.5em" }}>
+    <Box style={{ margin: "1em" }}>
       <h1>Auswertung</h1>
       <Select
         style={{ minWidth: "2em", width: "fit-content" }}
@@ -146,8 +80,22 @@ function Draw() {
         ))}
       </Select>
 
+      <Button
+        variant="contained"
+        onClick={() => {
+          if (!entity) return;
+          setDisabled(true);
+          exportExcel({ entity, years });
+          setDisabled(false);
+        }}
+        style={{ marginLeft: "1em" }}
+        disabled={disabled}
+      >
+        Export
+      </Button>
+
       <TableContainer component={Paper}>
-        <Table size="small" aria-label="a dense table">
+        <Table size="small" aria-label="a dense table" id="exportTable">
           <TableHead>
             <TableRow>
               <TableCell>
@@ -159,10 +107,14 @@ function Draw() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {calculation.map((row) => (
+            {calculation.map((row, index) => (
               <TableRow key={row.clinic}>
-                <TableCell>{row.clinic}</TableCell>
-                <TableCell>{row.counter}</TableCell>
+                <TableCell>
+                  {lastOneFat(row.clinic, index, calculation)}
+                </TableCell>
+                <TableCell>
+                  {lastOneFat(row.counter, index, calculation)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

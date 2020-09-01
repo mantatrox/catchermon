@@ -185,13 +185,8 @@ export const filterTextOnKeyUp = (
   chips: ChipData[],
   chipText: string
 ) => {
-  const possibleKeys = ["Enter", "Tab", " ", "Backspace"];
+  const possibleKeys = ["Enter", "Tab", " "];
   if (!possibleKeys.includes(event.key)) return chips;
-
-  if (event.key === "Backspace" && chipText === "") {
-    const nc = chips.slice(0, chips.length - 1);
-    return nc;
-  } else if (event.key === "Backspace" && chipText !== "") return chips;
 
   const newChip = chipText.trim();
   if (newChip === "") return chips;
@@ -199,5 +194,15 @@ export const filterTextOnKeyUp = (
   const nc = [...chips];
   nc.push({ key: chips.length, label: newChip });
 
+  return nc;
+};
+
+export const filterTextOnKeyDown = (
+  event: React.KeyboardEvent<HTMLDivElement>,
+  chips: ChipData[],
+  chipText: string
+) => {
+  if (event.key !== "Backspace" || chipText !== "") return chips;
+  const nc = chips.slice(0, chips.length - 1);
   return nc;
 };

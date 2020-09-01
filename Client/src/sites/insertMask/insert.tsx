@@ -9,6 +9,7 @@ import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
 import { check, getValue } from "./handlers";
+import { Save } from "@material-ui/icons";
 
 function RT(props: { entityId?: string }) {
   if (props.entityId && props.entityId !== "")
@@ -92,6 +93,7 @@ function InsertMask() {
         variant={"contained"}
         style={{ marginTop: "1em" }}
         onClick={onClickHandler}
+        startIcon={<Save />}
       >
         Speichern
       </Button>

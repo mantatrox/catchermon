@@ -5,21 +5,22 @@ import {
   Chip,
   CircularProgress,
   Grid,
-  TextField,
-  Typography
+  TextField
 } from "@material-ui/core";
+import { Add } from "@material-ui/icons";
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Redirect, useParams } from "react-router-dom";
 import { TableComponents } from "../../components";
-import { EntityObject, EntityType } from "../../model/interface";
+import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
 import {
   applyFilter,
   ChipData,
   conditionalRowStyle,
+  filterTextOnKeyDown,
   filterTextOnKeyUp,
   processColumns,
   processData
@@ -105,48 +106,45 @@ const EntityTable = () => {
   return (
     <div className="container">
       <RT link={link} />
-
       <Grid container>
-        <Grid item xs={1}>
+        <Grid item>
           <Button
             component={Link}
             to={`/sieb/entities/${entityId}/insert`}
             variant="contained"
+            color="primary"
+            startIcon={<Add />}
           >
-            +
+            Hinzufügen
           </Button>
         </Grid>
 
-        <Grid item xs={11}>
-          <Grid container direction="column">
-            <Typography
-              variant="h5"
-              style={{
-                marginRight: "0.2em",
-                marginTop: "0.4em"
-              }}
-            >
-              Filter:
-            </Typography>
-            <TextField
-              variant="outlined"
-              size="small"
-              onChange={(event) => {
-                setChipText(event.target.value);
-              }}
-              style={{
-                width: "100%"
-              }}
-              value={chipText}
-              onKeyUp={(event) => {
-                const nc = filterTextOnKeyUp(event, chips, chipText);
-                if (nc.length !== chips.length) {
-                  setChips(nc);
-                  setChipText("");
-                }
-              }}
-            />
-          </Grid>
+        <Grid item style={{ width: "80%" }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            label="Filter:"
+            onChange={(event) => {
+              setChipText(event.target.value);
+            }}
+            style={{
+              width: "100%",
+              marginLeft: "1em"
+            }}
+            value={chipText}
+            onKeyUp={(event) => {
+              const nc = filterTextOnKeyUp(event, chips, chipText);
+              if (nc.length === chips.length) return;
+              setChips(nc);
+              setChipText("");
+            }}
+            onKeyDown={(event) => {
+              const nc = filterTextOnKeyDown(event, chips, chipText);
+              if (nc.length === chips.length) return;
+              setChips(nc);
+              setChipText("");
+            }}
+          />
           <Grid
             component="ul"
             style={{
@@ -176,7 +174,6 @@ const EntityTable = () => {
           </Grid>
         </Grid>
       </Grid>
-
       <DataTable
         title={entity?.label}
         columns={cols}
@@ -196,47 +193,26 @@ const EntityTable = () => {
           rowsPerPageText: "Reihen pro Seite:"
         }}
         noDataComponent="Keine Daten vorhanden"
+        dense
+        paginationRowsPerPageOptions={[15, 20, 25, 30]}
+        paginationPerPage={15}
       />
-
-      {entity?.options.type === EntityType.SIMPLE ? (
-        <TableComponents.Simple
-          entity={entity}
-          open={openDialog}
-          referent={referent}
-          selectedObjectId={selectedObjectId}
-          closeHandler={(state) => {
-            setOpenDialog(state);
-          }}
-          deleteHandler={(objectId) => {
-            dispatcher.remove(objectId, referent);
-          }}
-          editHandler={(objectId) => {
-            setLink(`/sieb/entities/${entity._id}/insert/${objectId}`);
-          }}
-        />
-      ) : (
-        <TableComponents.Redist
-          entity={entity}
-          open={openDialog}
-          referent={referent}
-          selectedObjectId={selectedObjectId}
-          bookHandler={(objectId, referent) => {
-            dispatcher.book(objectId, referent);
-          }}
-          closeHandler={(state) => {
-            setOpenDialog(state);
-          }}
-          deleteHandler={(objectId) => {
-            dispatcher.remove(objectId, referent);
-          }}
-          deliverHandler={(objectId, referent) => {
-            dispatcher.deliver(objectId, referent);
-          }}
-          clearHandler={(objectId) => {
-            dispatcher.clear(objectId, referent);
-          }}
-        />
-      )}
+      <TableComponents.Simple
+        entity={entity}
+        open={openDialog}
+        referent={referent}
+        selectedObjectId={selectedObjectId}
+        closeHandler={(state) => {
+          setOpenDialog(state);
+        }}
+        deleteHandler={(objectId) => {
+          dispatcher.remove(objectId, referent);
+        }}
+        editHandler={(objectId) => {
+          if (!entity) return;
+          setLink(`/sieb/entities/${entity._id}/insert/${objectId}`);
+        }}
+      />
     </div>
   );
 };
