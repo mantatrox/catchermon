@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { Box } from "@material-ui/core";
-import { Document, Page } from "react-pdf";
-import entitiesConfig from "../../config/entities.json";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { Box, Paper } from "@material-ui/core";
+import React from "react";
 import { useDispatch } from "react-redux";
 import { dispatcher as IoDispatcher } from "../../store/io";
 
@@ -151,6 +150,191 @@ function Draw() {
           Besteller noch nachstehend genannte Anwender per Mail informiert:
         </li>
       </ul>
+      <Paper>
+        <table>
+          <thead>
+            <tr>
+              <th>Mietsiebe</th>
+              <th>Wer fordert an?</th>
+              <th>Wer will zusätzlich informiert werden?</th>
+              <th>Wie wird informiert?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Vogelsang</td>
+              <td>OP-Pfleger Volker Kurts</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>per Mail</td>
+            </tr>
+            <tr>
+              <td>Zerbst</td>
+              <td>OP-Schwester Birgit Giehl</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Burg</td>
+              <td>Burg OP</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Köthen</td>
+              <td>der Arzt</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Oschersleben</td>
+              <td>OC OP</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Berlin Buch</td>
+              <td>der Arzt</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>(Steri informieren. Hr.Nathan)</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Berlin EvB</td>
+              <td>der Arzt</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Bad Saarow</td>
+              <td>der Arzt</td>
+              <td>alle im Ticket genannte Kontakte</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Aue</td>
+              <td>
+                der Arzt/die Sekretärin{" "}
+                <span style={{ color: "red" }}>***</span>
+              </td>
+              <td>Sven.Freitag@helios-gesundheit.de </td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>MVZ Stollberg</td>
+              <td>Andreas.Fischer3@helios-gesundheit.de </td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>christian.hendel@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Plauen</td>
+              <td>Fr. Schmidt (Sekr. Unfallchir.)</td>
+              <td>joerg.eitner@helios-gesundheit.de </td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>CA Albig (Ortho)</td>
+              <td>tino.giese@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>Fr. Renner (Sekr. Neuro)</td>
+              <td>Sandra.Renner@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Pirna</td>
+              <td>OP Saal</td>
+              <td>piropsaal@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Freital</td>
+              <td>der Arzt</td>
+              <td>op.weisseritztal@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>MVZ Dresden West</td>
+              <td>op.weisseritztal@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>MVZ am Falkenbrunn</td>
+              <td>op.weisseritztal@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Leipzig</td>
+              <td>OP-Schwester Beatrix Förster</td>
+              <td>Beatrix.Foerster@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Schkeuditz</td>
+              <td>OP-Pflege</td>
+              <td>dirk.ries@helios-gesundheit.de </td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>grit.doyle@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>katrin.hacker@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>annett.anton@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>heike.gross@helios-gesundheit.de</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Leisnig</td>
+              <td>OP-Schwester Sandra Richter</td>
+              <td>op.leisnig@helios-gesundheit.de</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </Paper>
+
+      <p>
+        <span style={{ color: "red" }}>***</span>Mietsiebe, die von Ärzten, wie
+        z.B. Dr. Prägler, Mehlhorn, Hendel kommen, müssen von CA Diekstall
+        freigegeben werden oder bei Fr. Diekstall nachfragen
+      </p>
     </Box>
   );
 }
