@@ -1,21 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
-import { Button, Grid } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { TableComponents } from "../../components";
-import { ChipData } from "../../components/TableComponents/Filter";
 import entitiesConfig from "../../config/entities.json";
 import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
-import { conditionalRowStyle } from "./handlers";
 
-const EntityTable = () => {
-  const entityId = entitiesConfig.siebe;
-
+function Draw() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
@@ -29,24 +24,21 @@ const EntityTable = () => {
     }
   );
 
+  const entityId = entitiesConfig.contacts;
   const history = useHistory();
 
   const [cols, setCols] = useState([] as any);
   const [data, setData] = useState([] as any);
-  const [filtered, setFiltered] = useState([] as any);
 
   const [loading, setLoading] = useState(true);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedObjectId, setSelectedObjectId] = useState("");
 
-  const [chips, setChips] = useState<ChipData[]>([]);
-
   React.useEffect(() => {
     setLoading(true);
-    dispatcher.clearEntity();
     dispatcher.getEntity(entityId);
-    dispatcher.setTabValue(0);
+    dispatcher.setTabValue(2);
   }, []);
 
   React.useEffect(() => {
@@ -54,7 +46,6 @@ const EntityTable = () => {
     setCols(getColumns());
     const d = getData();
     setData(d);
-    setFiltered(d);
     setLoading(false);
   }, [entity]);
 
@@ -64,10 +55,6 @@ const EntityTable = () => {
       window.location.reload();
     }
   }, [insertSuccess]);
-
-  React.useEffect(() => {
-    setFiltered(TableComponents.Utils.applyFilter(chips, data, entity));
-  }, [chips]);
 
   const getColumns = () => {
     if (!entity) return [];
@@ -80,37 +67,25 @@ const EntityTable = () => {
   };
 
   return (
-    <div className="container">
-      <Grid container>
-        <Grid item>
-          <Button
-            component={Link}
-            to={`insert/${entityId}`}
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-          >
-            Hinzufügen
-          </Button>
-        </Grid>
-
-        <Grid item style={{ width: "80%" }}>
-          <TableComponents.Filter chips={chips} setChips={setChips} />
-        </Grid>
-      </Grid>
-
+    <Box style={{ margin: "2em" }}>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Add />}
+        onClick={() => history.push(`contacts/insert/${entityId}`)}
+      >
+        Hinzufügen
+      </Button>
       <TableComponents.TTable
         columns={cols}
-        data={filtered}
+        data={data}
         loading={loading}
+        title={entity?.label}
         onRowClicked={(item: EntityObject) => {
           if (!item._id) return;
           setSelectedObjectId(item._id);
           setOpenDialog(true);
         }}
-        title={entity?.label}
-        conditionalRowStyles={conditionalRowStyle(referent, entity)}
-        pagination
       />
 
       <TableComponents.TDialog.Simple
@@ -126,11 +101,11 @@ const EntityTable = () => {
         }}
         editHandler={(objectId) => {
           if (!entity) return;
-          history.push(`insert/${entityId}/${objectId}`);
+          history.push(`contacts/insert/${entityId}/${objectId}`);
         }}
       />
-    </div>
+    </Box>
   );
-};
+}
 
-export default EntityTable;
+export default Draw;

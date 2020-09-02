@@ -3,7 +3,7 @@
 import { Button, FormControl, Grid } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { InsertComponent } from "../../components";
 import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
@@ -11,15 +11,7 @@ import { dispatcher as IoDispatcher } from "../../store/io";
 import { check, getValue } from "./handlers";
 import { Save } from "@material-ui/icons";
 
-function RT(props: { entityId?: string }) {
-  if (props.entityId && props.entityId !== "")
-    return <Redirect to={`/sieb/entities/${props.entityId}`} />;
-  else return <div />;
-}
-
-function InsertMask() {
-  const { entityId, objectId } = useParams();
-
+function InsertMask(props: { backUrl: string }) {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
@@ -33,24 +25,29 @@ function InsertMask() {
     }
   );
 
-  const [redId, setRedId] = useState<string>("");
+  const history = useHistory();
+  const { entityId, objectId } = useParams();
+
   const [obj, setObj] = useState<EntityObject | undefined>();
+
+  React.useEffect(() => {
+    if (!entity) dispatcher.getEntity(entityId);
+    console.log(entityId);
+    console.log(objectId);
+  }, []);
 
   React.useEffect(() => {
     if (objectId && obj?._id !== objectId) {
       const o = entity?.items.find((i) => i._id === objectId);
       if (o && obj !== o) setObj(o);
     }
-  }, [objectId]);
-
-  React.useEffect(() => {
-    dispatcher.getEntity(entityId);
-  }, [entityId]);
+  }, [objectId, entity]);
 
   React.useEffect(() => {
     if (insertSuccess) {
       dispatcher.setInsertSuccess(false);
-      setRedId(entityId);
+      console.log(props.backUrl);
+      history.push(props.backUrl);
     }
   }, [insertSuccess]);
 
@@ -70,7 +67,6 @@ function InsertMask() {
 
   return (
     <div className="container">
-      <RT entityId={redId} />
       <h1>{entity?.label}</h1>
       <Grid container direction="column">
         {entity?.properties.map((p) => {

@@ -1,36 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { AppBar, Grid, Tab, Tabs } from "@material-ui/core";
-import React, { useState } from "react";
+import { AppBar, Tab, Tabs } from "@material-ui/core";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  BrowserRouter as Router,
-  Redirect,
-  Route,
-  Switch
-} from "react-router-dom";
+import { Route, Switch, useHistory } from "react-router-dom";
 import "./App.css";
+import entitiesConfig from "./config/entities.json";
 import {
   EntityTable,
   Evaluation,
-  Info,
   InsertMask,
-  PageNotFound
+  Organizer,
+  PageNotFound,
+  Contacts,
+  Guide
 } from "./sites";
 import { ApplicationState } from "./store";
 import { dispatcher as IoDispatcher } from "./store/io";
-
-function LC(props: { link: string }) {
-  if (props.link !== "") return <Redirect to={props.link} />;
-  return null;
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `nav-${index}`,
-    "aria-controls": `navtabs-${index}`
-  };
-}
 
 function App() {
   const dispatch = useDispatch();
@@ -42,78 +28,101 @@ function App() {
     };
   });
 
-  const [link, setLink] = useState<string>("");
-  const baseUrlRegex = /\/sieb\/?$/;
+  const history = useHistory();
 
   React.useEffect(() => {
     dispatcher.setReferent("Einkauf");
-
-    if (document.URL.match(baseUrlRegex))
-      setLink(`/sieb/entities/5f44f958069d750700ca930c`);
   }, []);
-
-  React.useEffect(() => {
-    if (link !== "") setLink("");
-  }, [link]);
 
   const onChangeTabs = (_: React.ChangeEvent<{}>, newValue: any) => {
     switch (newValue) {
       case 0:
-        setLink(`/sieb/entities/5f44f958069d750700ca930c`);
+        dispatcher.clearEntity();
+        history.push(entitiesConfig.baseUrl);
         break;
 
       case 1:
-        setLink(`/sieb/evaluation`);
+        dispatcher.clearEntity();
+        history.push(`/sieb/evaluation`);
         break;
 
       case 2:
-        setLink(`/sieb/info`);
+        dispatcher.clearEntity();
+        history.push(`/sieb/contacts`);
+        break;
+
+      case 3:
+        dispatcher.clearEntity();
+        history.push(`/sieb/guide`);
         break;
 
       default:
-        setLink(`/sieb/entities/5f44f958069d750700ca930c`);
+        dispatcher.clearEntity();
+        history.push(entitiesConfig.baseUrl);
         break;
     }
     dispatcher.setTabValue(newValue);
-    console.log(newValue);
   };
 
   return (
     <>
       <AppBar position="static" style={{ marginTop: 0, marginBottom: "2em" }}>
-        <Tabs value={tabValue} onChange={onChangeTabs} aria-label="navtabs">
-          <Tab label="Home" {...a11yProps(0)} />
-          <Tab label="Auswertung" {...a11yProps(1)} />
-          {/*<Tab label="Ansprechpartner" {...a11yProps(2)} /> */}
+        <Tabs value={tabValue} onChange={onChangeTabs}>
+          <Tab label="Home" />
+          <Tab label="Auswertung" />
+          <Tab label="Ansprechpartner" />
+          <Tab label="Anleitung" />
         </Tabs>
       </AppBar>
-      <LC link={link} />
 
-      <Grid container direction="column">
-        <Router>
-          <Switch>
-            <Route
-              exact
-              path="/sieb/entities/:entityId"
-              component={EntityTable}
-            />
-            <Route
-              exact
-              path="/sieb/entities/:entityId/insert"
-              component={InsertMask}
-            />
+      <Switch>
+        <Route exact path={entitiesConfig.baseUrl} component={EntityTable} />
 
-            <Route
-              path="/sieb/entities/:entityId/insert/:objectId"
-              component={InsertMask}
-            />
+        <Route exact path={`${entitiesConfig.baseUrl}insert/:entityId`}>
+          <InsertMask backUrl={entitiesConfig.baseUrl} />
+        </Route>
 
-            <Route path="/sieb/evaluation" component={Evaluation} />
-            <Route path="/sieb/info" component={Info} />
-            <Route path="*" component={PageNotFound} />
-          </Switch>
-        </Router>
-      </Grid>
+        <Route
+          exact
+          path={`${entitiesConfig.baseUrl}insert/:entityId/:objectId`}
+        >
+          <InsertMask backUrl={entitiesConfig.baseUrl} />
+        </Route>
+
+        <Route
+          path={`${entitiesConfig.baseUrl}evaluation`}
+          component={Evaluation}
+        />
+
+        <Route
+          exact
+          path={`${entitiesConfig.baseUrl}contacts`}
+          component={Contacts}
+        />
+
+        <Route
+          exact
+          path={`${entitiesConfig.baseUrl}contacts/insert/:entityId`}
+        >
+          <InsertMask backUrl={`${entitiesConfig.baseUrl}contacts`} />
+        </Route>
+
+        <Route
+          exact
+          path={`${entitiesConfig.baseUrl}contacts/insert/:entityId/:objectId`}
+        >
+          <InsertMask backUrl={`${entitiesConfig.baseUrl}contacts`} />
+        </Route>
+
+        <Route path={`${entitiesConfig.baseUrl}guide`} component={Guide} />
+
+        <Route
+          path={`${entitiesConfig.baseUrl}organizer`}
+          component={Organizer}
+        />
+
+        <Route path="*" component={PageNotFound} />
+      </Switch>
     </>
   );
 }

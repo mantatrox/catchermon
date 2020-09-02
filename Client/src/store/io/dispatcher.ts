@@ -85,6 +85,10 @@ export default function dispatcher(dispatch: Dispatch<DispatchAction>) {
     });
   }
 
+  function clearEntity() {
+    dispatch({ type: actions.ClearEntity, payload: {} });
+  }
+
   return {
     getData,
     getEntity,
@@ -101,6 +105,7 @@ export default function dispatcher(dispatch: Dispatch<DispatchAction>) {
     book,
     remove,
     clear,
-    updateObject
+    updateObject,
+    clearEntity
   };
 }

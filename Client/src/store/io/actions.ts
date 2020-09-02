@@ -6,6 +6,7 @@ enum actions {
   SetReferent = "IO_SET_REFERENT",
   SetPageId = "IO_SET_PAGE_ID",
   SetObjectId = "IO_SET_OBJECT_ID",
+  ClearEntity = "IO_CLEAR_ENTITY",
 
   GetDataStart = "IO_GET_DATA_START",
   GetDataSuccess = "IO_GET_DATA_SUCCESS",

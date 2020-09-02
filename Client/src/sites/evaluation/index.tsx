@@ -24,6 +24,8 @@ import {
   lastOneFat
 } from "./handlers";
 
+import config from "../../config/entities.json";
+
 function Draw() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
@@ -42,13 +44,12 @@ function Draw() {
 
   React.useEffect(() => {
     dispatcher.setTabValue(1);
+    dispatcher.getEntity(config.siebe);
   }, []);
 
   React.useEffect(() => {
-    if (!entity) {
-      dispatcher.getEntity("5f44f958069d750700ca930c");
-      return;
-    }
+    if (!entity) return;
+
     setYears(getYears(entity));
   }, [entity]);
 
@@ -63,7 +64,7 @@ function Draw() {
   }, [selectedYear]);
 
   return (
-    <Box style={{ margin: "1em" }}>
+    <Box style={{ margin: "2em" }}>
       <h1>Auswertung</h1>
       <Select
         style={{ minWidth: "2em", width: "fit-content" }}

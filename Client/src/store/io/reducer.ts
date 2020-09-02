@@ -96,6 +96,9 @@ export const reducer: Reducer<ReducerState, DispatchAction> = (
     case actions.UpdateObjectSuccess:
       return { ...state, insertSuccess: true };
 
+    case actions.ClearEntity:
+      return { ...state, entity: undefined };
+
     default:
       return { ...state };
   }
