@@ -3,7 +3,12 @@
 import { AppBar, Grid, Tab, Tabs } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Route, Switch } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Redirect,
+  Route,
+  Switch
+} from "react-router-dom";
 import "./App.css";
 import {
   EntityTable,
@@ -85,27 +90,29 @@ function App() {
       <LC link={link} />
 
       <Grid container direction="column">
-        <Switch>
-          <Route
-            exact
-            path="/sieb/entities/:entityId"
-            component={EntityTable}
-          />
-          <Route
-            exact
-            path="/sieb/entities/:entityId/insert"
-            component={InsertMask}
-          />
+        <Router>
+          <Switch>
+            <Route
+              exact
+              path="/sieb/entities/:entityId"
+              component={EntityTable}
+            />
+            <Route
+              exact
+              path="/sieb/entities/:entityId/insert"
+              component={InsertMask}
+            />
 
-          <Route
-            path="/sieb/entities/:entityId/insert/:objectId"
-            component={InsertMask}
-          />
+            <Route
+              path="/sieb/entities/:entityId/insert/:objectId"
+              component={InsertMask}
+            />
 
-          <Route path="/sieb/evaluation" component={Evaluation} />
-          <Route path="/sieb/info" component={Info} />
-          <Route path="*" component={PageNotFound} />
-        </Switch>
+            <Route path="/sieb/evaluation" component={Evaluation} />
+            <Route path="/sieb/info" component={Info} />
+            <Route path="*" component={PageNotFound} />
+          </Switch>
+        </Router>
       </Grid>
     </>
   );
