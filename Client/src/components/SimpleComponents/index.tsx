@@ -1,5 +1,12 @@
-import { IconButton } from "@material-ui/core";
-import { Add, Delete, Visibility, VisibilityOff } from "@material-ui/icons";
+import { IconButton, Button } from "@material-ui/core";
+import {
+  Add,
+  Delete,
+  Visibility,
+  VisibilityOff,
+  Cancel,
+  Edit
+} from "@material-ui/icons";
 import React from "react";
 
 function AddButton(props: { onClickHandler(): void }) {
@@ -12,9 +19,42 @@ function AddButton(props: { onClickHandler(): void }) {
 
 function DeleteButton(props: { onClickHandler(): void }) {
   return (
-    <IconButton edge="end" aria-label="delete" onClick={props.onClickHandler}>
-      <Delete />
-    </IconButton>
+    <Button
+      variant="contained"
+      aria-label="delete"
+      onClick={props.onClickHandler}
+      startIcon={<Delete />}
+    >
+      Entfernen
+    </Button>
+  );
+}
+
+function AbortButton(props: { onClickHandler(): void }) {
+  return (
+    <Button
+      variant="contained"
+      aria-label="abort"
+      color="secondary"
+      onClick={props.onClickHandler}
+      startIcon={<Cancel />}
+    >
+      Abbrechen
+    </Button>
+  );
+}
+
+function EditButton(props: { onClickHandler(): void }) {
+  return (
+    <Button
+      variant="contained"
+      aria-label="abort"
+      color="primary"
+      onClick={props.onClickHandler}
+      startIcon={<Edit />}
+    >
+      Bearbeiten
+    </Button>
   );
 }
 
@@ -35,4 +75,11 @@ function Hider(props: React.PropsWithChildren<{ hidden: boolean }>) {
   return <div>{props.children}</div>;
 }
 
-export default { AddButton, DeleteButton, VisibilityButton, Hider };
+export default {
+  AddButton,
+  DeleteButton,
+  VisibilityButton,
+  Hider,
+  AbortButton,
+  EditButton
+};

@@ -1,6 +1,6 @@
 import { Action, Reducer } from "redux";
 import actions from "./actions";
-import { Page, Entity, StateReturn } from "../../model/interface";
+import { Page, Entity, StateReturn, EntityObject } from "../../model/interface";
 
 export interface ReducerState {
   page?: Page;
@@ -15,6 +15,7 @@ export interface ReducerState {
   newEntity?: Entity;
   tabValue: number;
   objectId: string;
+  newObject?: EntityObject;
 }
 
 const initialState: ReducerState = {
@@ -91,6 +92,12 @@ export const reducer: Reducer<ReducerState, DispatchAction> = (
 
     case actions.SetPageId:
       return { ...state, pageId: action.payload.pageId || "" };
+
+    case actions.UpdateObjectSuccess:
+      return { ...state, insertSuccess: true };
+
+    case actions.ClearEntity:
+      return { ...state, entity: undefined };
 
     default:
       return { ...state };

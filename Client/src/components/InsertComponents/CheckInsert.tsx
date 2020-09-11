@@ -7,8 +7,13 @@ function CheckElem(props: {
   cb: CheckboxProp;
   solutions: StateReturn[];
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) {
   const [state, setState] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (props.value) setState(props.value === "true");
+  }, [props.value]);
 
   React.useEffect(() => {
     const read = props.solutions.find((s) => s.propName === props.cb.name);

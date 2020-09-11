@@ -27,4 +27,9 @@ const remove = async (objectId: string, referent: string) => {
   return await poster(url, { delivery: { objectId, referent } });
 };
 
-export default { create, deliver, book, clear, remove };
+const update = async (entObj: EntityObject) => {
+  const url = `${config.baseUrl}/objects`;
+  return await poster(url, { entObj });
+};
+
+export default { create, deliver, book, clear, remove, update };

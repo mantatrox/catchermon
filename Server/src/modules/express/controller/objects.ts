@@ -1,6 +1,6 @@
 import Joi from "@hapi/joi";
 import { RequestHandler } from "express";
-import { PostObject } from "../../../model/entities";
+import { PostObject, EntityObject } from "../../../model/entities";
 import { dataHandler } from "../../index";
 import { sendBadRequest, sendInternalServerError, sendOK } from "./utils";
 
@@ -46,6 +46,40 @@ const create: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.create(body.entityId, body.item);
+    sendOK(res);
+  } catch (error) {
+    sendInternalServerError(res);
+    throw error;
+  }
+};
+
+const update: RequestHandler = async (req, res) => {
+  try {
+    const body = req.body.entObj as EntityObject;
+    const schema = Joi.object({
+      _id: Joi.string().required(),
+      referent: Joi.string().required(),
+      properties: Joi.array().items(
+        Joi.object({
+          propKey: Joi.string().required(),
+          propValue: Joi.alternatives().try(
+            Joi.string().required(),
+            Joi.array().items(Joi.string())
+          )
+        })
+      ),
+      insertDate: Joi.string(),
+      distribution: Joi.object()
+    });
+    const { error } = schema.validate(body);
+
+    if (error) {
+      sendBadRequest(res);
+      console.log(error);
+      return;
+    }
+
+    await dataHandler.objects.update(body);
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -129,4 +163,4 @@ const remove: RequestHandler = async (req, res) => {
   }
 };
 
-export default { create, book, deliver, clear, remove };
+export default { create, book, deliver, clear, remove, update };

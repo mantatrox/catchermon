@@ -67,6 +67,7 @@ const Simple = (props: {
   open: boolean;
   closeHandler(state: boolean): void;
   deleteHandler(objectId: string): void;
+  editHandler(objectId: string): void;
 }) => {
   if (!props.entity) return null;
   const obj = props.entity.items.find((i) => i._id === props.selectedObjectId);
@@ -79,19 +80,14 @@ const Simple = (props: {
   const actions =
     obj.referent === props.referent ? (
       <>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => {
-            props.closeHandler(false);
-          }}
-        >
-          Abbrechen
-        </Button>
+        <SimpleComponents.EditButton
+          onClickHandler={() => props.editHandler(props.selectedObjectId)}
+        />
+        <SimpleComponents.AbortButton
+          onClickHandler={() => props.closeHandler(false)}
+        />
         <SimpleComponents.DeleteButton
-          onClickHandler={() => {
-            props.deleteHandler(props.selectedObjectId);
-          }}
+          onClickHandler={() => props.deleteHandler(props.selectedObjectId)}
         />
       </>
     ) : (
@@ -107,7 +103,12 @@ const Simple = (props: {
     );
 
   return (
-    <Dialog open={props.open} fullWidth maxWidth="md">
+    <Dialog
+      open={props.open}
+      fullWidth
+      maxWidth="md"
+      onBackdropClick={() => props.closeHandler(false)}
+    >
       <DialogTitle>Daten</DialogTitle>
       <DialogContent>{content}</DialogContent>
       <DialogActions>{actions}</DialogActions>
@@ -237,7 +238,12 @@ const Redist = (props: {
   }
 
   return (
-    <Dialog open={props.open} fullWidth maxWidth="md">
+    <Dialog
+      open={props.open}
+      fullWidth
+      maxWidth="md"
+      onBackdropClick={() => props.closeHandler(false)}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{content}</DialogContent>
       <DialogActions>{actions}</DialogActions>

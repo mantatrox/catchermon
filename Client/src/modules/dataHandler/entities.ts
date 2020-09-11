@@ -15,7 +15,8 @@ const getOpen = async (entityId: string) => {
 
 const update = async (entity: Entity) => {
   const url = `${config.baseUrl}/entities`;
-  return await poster(url, { entity });
+  const { items, ...custom } = entity;
+  return await poster(url, { custom });
 };
 
 const create = async (pageId: string, entityLabel: string) => {

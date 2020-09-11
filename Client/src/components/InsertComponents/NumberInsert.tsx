@@ -8,8 +8,13 @@ function NumberElem(props: {
   np: NumberProp;
   solutions: StateReturn[];
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) {
   const [state, setState] = useState<string>("");
+
+  React.useEffect(() => {
+    if (props.value) setState(props.value);
+  }, [props.value]);
 
   React.useEffect(() => {
     refresh(state, props.np, props.solutions, props.setHandler);

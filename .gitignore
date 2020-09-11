@@ -2,5 +2,6 @@
 */node_modules/*
 package-lock.json
 Server/src/config/db.json
-*Mietsiebe*
-Deploy
+Deploy/
+Mietsiebe*
+public/guide/*

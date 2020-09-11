@@ -20,18 +20,18 @@ import {
 } from "@material-ui/core";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, useParams } from "react-router-dom";
 import {
+  OrganizerComponents,
   OrganizerOption,
   SimpleComponents,
-  Utils,
-  OrganizerComponents
-} from "../components";
-import { Entity, PropertyType, Property } from "../model/interface";
-import { DefaultEntity } from "../model/init";
-import { propHandler } from "../modules";
-import { ApplicationState } from "../store";
-import { dispatcher as IoDispatcher } from "../store/io";
+  Utils
+} from "../../components";
+import entitiesConfig from "../../config/entities.json";
+import { DefaultEntity } from "../../model/init";
+import { Entity, Property, PropertyType } from "../../model/interface";
+import { propHandler } from "../../modules";
+import { ApplicationState } from "../../store";
+import { dispatcher as IoDispatcher } from "../../store/io";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,13 +49,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRight: `1px solid ${theme.palette.divider}`
   }
 }));
-
-function a11yProps(index: any) {
-  return {
-    id: `vertical-tab-${index}`,
-    "aria-controls": `vertical-tabpanel-${index}`
-  };
-}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -113,7 +106,7 @@ function Organizer() {
     };
   });
 
-  const { pageId } = useParams();
+  const pageId = entitiesConfig.page;
 
   React.useEffect(() => {
     dispatcher.getData(pageId);
@@ -121,11 +114,21 @@ function Organizer() {
   }, []);
 
   React.useEffect(() => {
-    if (page) setEntities(page.entities);
+    if (!page) return;
+
+    setEntities(page.entities);
+    setOpenAddDialog(false);
+    setOpenDeleteDialog(false);
+    setOpenEntityDialog(false);
+    setTabIndex(page.entities.length - 1);
+    setNewType(page.entities[page.entities.length - 1].label);
   }, [page]);
 
   React.useEffect(() => {
-    if (insertSuccess) dispatcher.setInsertSuccess(false);
+    if (insertSuccess) {
+      dispatcher.setInsertSuccess(false);
+      dispatcher.getData(pageId);
+    }
   }, [insertSuccess]);
 
   const classes = useStyles();
@@ -145,7 +148,7 @@ function Organizer() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
-  const onTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const onTabChange = (_: React.ChangeEvent<{}>, newValue: number) => {
     setTabIndex(newValue);
   };
 
@@ -182,11 +185,9 @@ function Organizer() {
                 value={tabIndex}
                 className={classes.tabs}
               >
-                <Tab key="general" label="Allgemein" {...a11yProps(0)} />
+                <Tab key="general" label="Allgemein" />
                 {entity.properties.map((p, i) => {
-                  return (
-                    <Tab key={p.name} label={p.label} {...a11yProps(i + 1)} />
-                  );
+                  return <Tab key={p.name} label={p.label} />;
                 })}
 
                 <SimpleComponents.AddButton
@@ -204,7 +205,11 @@ function Organizer() {
               {entity.properties.map((p, i) => {
                 if (!entity.options) return null;
                 return (
-                  <TabPanel value={tabIndex} index={i + 1}>
+                  <TabPanel
+                    value={tabIndex}
+                    index={i + 1}
+                    key={`tabpanel_${p.name}`}
+                  >
                     <OrganizerOption property={p} />
                     <SimpleComponents.VisibilityButton
                       hidden={entity.options.hiddenProperties.some(
@@ -238,7 +243,7 @@ function Organizer() {
           </Button>
         </>
       );
-    return <></>;
+    return null;
   }
 
   const handleAddDialogClose = () => {
@@ -273,15 +278,8 @@ function Organizer() {
     dispatcher.createEntity(pageId, newEntityName);
   };
 
-  function RT(props: { entityId?: string; insertSuccess: boolean }) {
-    if (insertSuccess && props.entityId !== "")
-      return <Redirect to={`/entities/${props.entityId}`} />;
-    else return <div />;
-  }
-
   return (
     <>
-      <RT entityId={entity._id} insertSuccess={insertSuccess} />
       <Grid container direction="row" style={{ marginBottom: "2em" }}>
         {de()}
       </Grid>
