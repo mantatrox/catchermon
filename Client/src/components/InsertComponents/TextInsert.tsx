@@ -7,8 +7,13 @@ function TextElem(props: {
   tb: TextProp;
   solutions: StateReturn[];
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) {
   const [state, setState] = useState<string>("");
+
+  React.useEffect(() => {
+    if (props.value) setState(props.value);
+  }, [props.value]);
 
   React.useEffect(() => {
     const read = props.solutions.find((s) => s.propName === props.tb.name);
@@ -35,6 +40,7 @@ function TextElem(props: {
       multiline={props.tb.multiline}
       type="text"
       onChange={handleOnChange}
+      value={state}
     />
   );
 }

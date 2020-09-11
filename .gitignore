@@ -4,3 +4,4 @@ package-lock.json
 Server/src/config/db.json
 Deploy/
 Mietsiebe*
+public/guide/*

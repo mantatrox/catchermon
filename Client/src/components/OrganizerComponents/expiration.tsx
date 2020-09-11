@@ -39,10 +39,6 @@ function Draw(props: { entity: Entity }) {
   }, [props.entity]);
 
   React.useEffect(() => {
-    console.log(expires);
-  }, [expires]);
-
-  React.useEffect(() => {
     if (!init) return;
     if (!expires) props.entity.options.expiration = undefined;
     else {

@@ -15,6 +15,7 @@ function Draw(props: {
   lp: DateProp;
   solutions: StateReturn[];
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) {
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(
     new Date()
@@ -23,7 +24,8 @@ function Draw(props: {
 
   React.useEffect(() => {
     moment.locale("de");
-  }, []);
+    if (props.value) setSelectedDate(new Date(props.value));
+  }, [props.value]);
 
   React.useEffect(() => {
     if (!selectedDate) return;
@@ -56,6 +58,7 @@ function Draw(props: {
           setOpen(true);
         }}
         open={open}
+        onClick={() => setOpen(true)}
         onChange={handleDateChange}
         onClose={() => {
           setOpen(false);

@@ -6,6 +6,7 @@ enum actions {
   SetReferent = "IO_SET_REFERENT",
   SetPageId = "IO_SET_PAGE_ID",
   SetObjectId = "IO_SET_OBJECT_ID",
+  ClearEntity = "IO_CLEAR_ENTITY",
 
   GetDataStart = "IO_GET_DATA_START",
   GetDataSuccess = "IO_GET_DATA_SUCCESS",
@@ -45,7 +46,11 @@ enum actions {
 
   ClearStart = "IO_CLEAR_START",
   ClearSuccess = "IO_CLEAR_SUCCESS",
-  ClearError = "IO_CLEAR_ERROR"
+  ClearError = "IO_CLEAR_ERROR",
+
+  UpdateObjectStart = "IO_UPDATE_OBJECT_START",
+  UpdateObjectSuccess = "IO_UPDATE_OBJECT_SUCCESS",
+  UpdateObjectError = "IO_UPDATE_OBJECT_ERROR"
 }
 
 export default actions;

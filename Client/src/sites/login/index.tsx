@@ -1,22 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState } from "react";
-import { dispatcher as IoDispatcher } from "../store/io";
-import { useSelector, useDispatch } from "react-redux";
-import { ApplicationState } from "../store";
 import {
-  Select,
-  MenuItem,
+  Button,
+  createStyles,
+  FormControl,
   Grid,
   InputLabel,
-  FormControl,
   makeStyles,
-  Theme,
-  createStyles,
-  Button
+  MenuItem,
+  Select,
+  Theme
 } from "@material-ui/core";
-import { Page } from "../model/interface";
-import { Redirect } from "react-router-dom";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import Cookies from "universal-cookie";
+import { Page } from "../../model/interface";
+import { ApplicationState } from "../../store";
+import { dispatcher as IoDispatcher } from "../../store/io";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -58,21 +58,17 @@ const DrawReferents = (props: {
   );
 };
 
-const RL = (props: { link: boolean }) => {
-  if (!props.link) return <div />;
-
-  return <Redirect to="/" />;
-};
-
 function LoginPage() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
+
+  const history = useHistory();
+
   const { pages } = useSelector((state: ApplicationState) => {
     return { pages: state.io.pages };
   });
 
   const [pageId, setPageId] = useState("");
-  const [link, setLink] = useState(false);
   const [referent, setReferent] = useState("");
 
   React.useEffect(() => {
@@ -124,12 +120,11 @@ function LoginPage() {
           console.log(pageId);
           dispatcher.setReferent(referent);
           dispatcher.setPageId(pageId);
-          setLink(true);
+          history.push("/");
         }}
       >
         Login
       </Button>
-      <RL link={link} />
     </Grid>
   );
 }

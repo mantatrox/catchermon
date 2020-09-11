@@ -58,7 +58,6 @@ async function update(id: string, entity: Entity) {
 
   const ne = {
     $set: {
-      items: en.items.map((i) => new ObjectId(i._id)),
       label: en.label,
       properties: en.properties,
       options: en.options

@@ -20,6 +20,7 @@ function Draw(props: {
   solutions: StateReturn[];
   property: Property;
   setHandler(solutions: StateReturn[]): void;
+  value?: string;
 }) {
   switch (props.property.type) {
     case PropertyType.ListProp:
@@ -28,6 +29,7 @@ function Draw(props: {
           lp={props.property as ListProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 
@@ -37,6 +39,7 @@ function Draw(props: {
           tb={props.property as TextProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 
@@ -46,6 +49,7 @@ function Draw(props: {
           np={props.property as NumberProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 
@@ -55,6 +59,7 @@ function Draw(props: {
           cb={props.property as CheckboxProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 
@@ -64,6 +69,7 @@ function Draw(props: {
           lp={props.property as DateProp}
           solutions={props.solutions}
           setHandler={props.setHandler}
+          value={props.value}
         />
       );
 
