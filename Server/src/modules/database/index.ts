@@ -1,5 +1,5 @@
-import autoBind from "auto-bind";
 import { MongoClient } from "mongodb";
+import autoBind from "auto-bind";
 
 export interface MCOptions {
   host: string;
