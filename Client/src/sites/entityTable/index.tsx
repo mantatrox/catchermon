@@ -1,30 +1,29 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { Button, Grid } from "@material-ui/core";
+import { Button, Grid, MenuItem, Select } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, StaticRouter, useHistory, useParams } from "react-router-dom";
 import { TableComponents } from "../../components";
 import { ChipData } from "../../components/TableComponents/Filter";
-import entitiesConfig from "../../config/entities.json";
 import { EntityObject } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
 import { conditionalRowStyle } from "./handlers";
+import Cookies from "universal-cookie";
 
 const EntityTable = () => {
-  const entityId = entitiesConfig.siebe;
-
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
-  const { entity, insertSuccess, referent } = useSelector(
+  const { entity, insertSuccess, referent, page } = useSelector(
     (state: ApplicationState) => {
       return {
         entity: state.io.entity,
         insertSuccess: state.io.insertSuccess,
-        referent: state.io.referent
+        referent: state.io.referent,
+        page: state.io.page
       };
     }
   );
@@ -42,15 +41,38 @@ const EntityTable = () => {
 
   const [chips, setChips] = useState<ChipData[]>([]);
 
+  const { entityId } = useParams<{ entityId: string }>();
+
+  const cookies = new Cookies();
+
   React.useEffect(() => {
+    const cookie = cookies.get("page");
+    if (!cookie || cookie === "undefined") {
+      history.push("/login");
+      return;
+    }
+
     setLoading(true);
+    dispatcher.getData(cookie.pageId);
+    dispatcher.setReferent(cookie.referent);
     dispatcher.clearEntity();
-    dispatcher.getEntity(entityId);
     dispatcher.setTabValue(0);
   }, []);
 
   React.useEffect(() => {
+    if (entityId) {
+      if (!page?.entities.some((e) => e._id === entityId)) {
+        history.push("/not/found/");
+        return;
+      }
+      dispatcher.getEntity(entityId);
+    }
+    setLoading(true);
+  }, [entityId]);
+
+  React.useEffect(() => {
     if (!entity) return;
+
     setCols(getColumns());
     const d = getData();
     setData(d);
@@ -59,9 +81,10 @@ const EntityTable = () => {
   }, [entity]);
 
   React.useEffect(() => {
-    if (insertSuccess) {
+    if (insertSuccess && entity?._id) {
       dispatcher.setInsertSuccess(false);
-      window.location.reload();
+      dispatcher.getEntity(entity?._id);
+      setLoading(true);
     }
   }, [insertSuccess]);
 
@@ -81,14 +104,33 @@ const EntityTable = () => {
 
   return (
     <div className="container">
+      <Select
+        value={entity?._id}
+        key={`select${entity?._id}`}
+        style={{ margin: "1em" }}
+        label="Entities"
+        onChange={(event) => {
+          const id = event.target.value as string;
+          history.push(`/${id}`);
+        }}
+      >
+        {page?.entities.map((entity) => {
+          return (
+            <MenuItem key={entity.label} value={entity._id}>
+              {entity.label}
+            </MenuItem>
+          );
+        })}
+      </Select>
       <Grid container>
         <Grid item>
           <Button
             component={Link}
-            to={`insert/${entityId}`}
+            to={`insert/${entity?._id}`}
             variant="contained"
             color="primary"
             startIcon={<Add />}
+            disabled={!entity || loading}
           >
             Hinzufügen
           </Button>
@@ -126,7 +168,7 @@ const EntityTable = () => {
         }}
         editHandler={(objectId) => {
           if (!entity) return;
-          history.push(`insert/${entityId}/${objectId}`);
+          history.push(`insert/${entity._id}/${objectId}`);
         }}
       />
     </div>

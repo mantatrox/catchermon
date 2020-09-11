@@ -26,7 +26,6 @@ import {
   SimpleComponents,
   Utils
 } from "../../components";
-import entitiesConfig from "../../config/entities.json";
 import { DefaultEntity } from "../../model/init";
 import { Entity, Property, PropertyType } from "../../model/interface";
 import { propHandler } from "../../modules";
@@ -106,10 +105,8 @@ function Organizer() {
     };
   });
 
-  const pageId = entitiesConfig.page;
-
   React.useEffect(() => {
-    dispatcher.getData(pageId);
+    dispatcher.getData(page?._id);
     dispatcher.setTabValue(1);
   }, []);
 
@@ -127,7 +124,7 @@ function Organizer() {
   React.useEffect(() => {
     if (insertSuccess) {
       dispatcher.setInsertSuccess(false);
-      dispatcher.getData(pageId);
+      dispatcher.getData(page?._id);
     }
   }, [insertSuccess]);
 
@@ -274,8 +271,8 @@ function Organizer() {
   };
 
   const handleAddEntity = () => {
-    if (newEntityName === "") return;
-    dispatcher.createEntity(pageId, newEntityName);
+    if (!page?._id || newEntityName === "") return;
+    dispatcher.createEntity(page?._id, newEntityName);
   };
 
   return (

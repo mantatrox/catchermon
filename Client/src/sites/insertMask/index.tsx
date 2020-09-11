@@ -11,7 +11,7 @@ import { dispatcher as IoDispatcher } from "../../store/io";
 import { check, getValue } from "./handlers";
 import { Save } from "@material-ui/icons";
 
-function InsertMask(props: { backUrl: string }) {
+function InsertMask() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
@@ -26,14 +26,15 @@ function InsertMask(props: { backUrl: string }) {
   );
 
   const history = useHistory();
-  const { entityId, objectId } = useParams();
+  const { entityId, objectId } = useParams<{
+    entityId: string;
+    objectId: string;
+  }>();
 
   const [obj, setObj] = useState<EntityObject | undefined>();
 
   React.useEffect(() => {
     if (!entity) dispatcher.getEntity(entityId);
-    console.log(entityId);
-    console.log(objectId);
   }, []);
 
   React.useEffect(() => {
@@ -46,8 +47,7 @@ function InsertMask(props: { backUrl: string }) {
   React.useEffect(() => {
     if (insertSuccess) {
       dispatcher.setInsertSuccess(false);
-      console.log(props.backUrl);
-      history.push(props.backUrl);
+      history.push(`/${entityId}`);
     }
   }, [insertSuccess]);
 

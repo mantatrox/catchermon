@@ -4,8 +4,15 @@ import { AppBar, Tab, Tabs } from "@material-ui/core";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Switch, useHistory } from "react-router-dom";
+import Cookies from "universal-cookie";
 import "./App.css";
-import { EntityTable, InsertMask, Organizer, PageNotFound } from "./sites";
+import {
+  EntityTable,
+  InsertMask,
+  Organizer,
+  PageNotFound,
+  Login
+} from "./sites";
 import { ApplicationState } from "./store";
 import { dispatcher as IoDispatcher } from "./store/io";
 
@@ -20,9 +27,16 @@ function App() {
   });
 
   const history = useHistory();
+  const cookies = new Cookies();
 
   React.useEffect(() => {
-    dispatcher.setReferent("Einkauf");
+    const cookie = cookies.get("page");
+    if (cookie !== undefined && cookie !== "undefined") {
+      dispatcher.setPageId(cookie.pageId);
+      dispatcher.setReferent(cookie.referent);
+    } else {
+      history.push("/login");
+    }
   }, []);
 
   const onChangeTabs = (_: React.ChangeEvent<{}>, newValue: any) => {
@@ -34,17 +48,7 @@ function App() {
 
       case 1:
         dispatcher.clearEntity();
-        history.push(`/sieb/evaluation`);
-        break;
-
-      case 2:
-        dispatcher.clearEntity();
-        history.push(`/sieb/contacts`);
-        break;
-
-      case 3:
-        dispatcher.clearEntity();
-        history.push(`/sieb/guide`);
+        history.push(`/organizer`);
         break;
 
       default:
@@ -60,25 +64,25 @@ function App() {
       <AppBar position="static" style={{ marginTop: 0, marginBottom: "2em" }}>
         <Tabs value={tabValue} onChange={onChangeTabs}>
           <Tab label="Home" />
-          <Tab label="Auswertung" />
-          <Tab label="Ansprechpartner" />
-          <Tab label="Anleitung" />
+          <Tab label="Organizer" />
         </Tabs>
       </AppBar>
 
       <Switch>
         <Route exact path={"/"} component={EntityTable} />
 
-        <Route exact path={`/insert/:entityId`}>
-          <InsertMask backUrl="/" />
-        </Route>
+        <Route exact path={`/insert/:entityId`} component={InsertMask} />
 
-        <Route exact path={`/insert/:entityId/:objectId`}>
-          <InsertMask backUrl="/" />
-        </Route>
+        <Route
+          exact
+          path={`/insert/:entityId/:objectId`}
+          component={InsertMask}
+        />
 
-        <Route path={`/organizer`} component={Organizer} />
+        <Route exact path={`/organizer`} component={Organizer} />
+        <Route exact path={`/login`} component={Login} />
 
+        <Route exact path={"/:entityId"} component={EntityTable} />
         <Route path="*" component={PageNotFound} />
       </Switch>
     </>
