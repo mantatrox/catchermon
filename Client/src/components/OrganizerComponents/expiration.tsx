@@ -1,13 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
-import { Entity, TimeOffset, ExpireType } from "../../model/interface";
+import {
+  Entity,
+  TimeOffset,
+  ExpireType,
+  PropertyType
+} from "../../model/interface";
 import {
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Grid,
-  TextField
+  TextField,
+  Box
 } from "@material-ui/core";
 
 import { OrganizerComponents, SimpleComponents } from "../";
@@ -22,6 +28,7 @@ function Draw(props: { entity: Entity }) {
     TimeOffset.MINUTES
   );
   const [expireOffset, setExpireOffset] = React.useState("");
+  const [expireProp, setExpireProp] = React.useState("");
 
   React.useEffect(() => {
     if (init) return;
@@ -34,6 +41,8 @@ function Draw(props: { entity: Entity }) {
     setExpireType(props.entity.options.expiration.expireType);
     setExpiresOffsetType(props.entity.options.expiration.offsetType);
     setExpireOffset(props.entity.options.expiration.offset.toString());
+    if (props.entity.options.expiration.expireProp)
+      setExpireProp(props.entity.options.expiration.expireProp);
 
     setInit(true);
   }, [props.entity]);
@@ -46,10 +55,17 @@ function Draw(props: { entity: Entity }) {
       props.entity.options.expiration = {
         expireType,
         offset: isNaN(offset) ? 0 : offset,
-        offsetType: expireOffsetType
+        offsetType: expireOffsetType,
+        expireProp
       };
     }
-  }, [expires, expireType, expireOffsetType, expireOffset]);
+  }, [expires, expireType, expireOffsetType, expireOffset, expireProp]);
+
+  function getDateProps() {
+    return props.entity.properties.filter(
+      (p) => p.type === PropertyType.DateProp
+    );
+  }
 
   return (
     <Grid container direction="column">
@@ -77,6 +93,24 @@ function Draw(props: { entity: Entity }) {
             <MenuItem value={ExpireType.ONCOLUMN}>An Datumeigenschaft</MenuItem>
           </Select>
         </FormControl>
+        <Box marginTop="1em">
+          <SimpleComponents.Hider hidden={expireType !== ExpireType.ONCOLUMN}>
+            <InputLabel id="selectDatePropLabel">Datumseigenschaft</InputLabel>
+            <Select
+              labelId="selectDatePropLabel"
+              value={expireProp}
+              onChange={(event) => setExpireProp(event.target.value as string)}
+            >
+              {getDateProps().map((dp) => {
+                return (
+                  <MenuItem key={`me_${dp.name}`} value={dp.name}>
+                    {dp.label}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </SimpleComponents.Hider>
+        </Box>
         <Grid container direction="row">
           <Grid item sm={4}>
             <FormControl required>

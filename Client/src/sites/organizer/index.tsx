@@ -31,6 +31,8 @@ import { Entity, Property, PropertyType } from "../../model/interface";
 import { propHandler } from "../../modules";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
+import Cookies from "universal-cookie";
+import { useHistory } from "react-router-dom";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -105,8 +107,18 @@ function Organizer() {
     };
   });
 
+  const cookies = new Cookies();
+  const history = useHistory();
+
   React.useEffect(() => {
-    dispatcher.getData(page?._id);
+    const cookie = cookies.get("page");
+    if (!cookie || cookie === "undefined") {
+      history.push("/login");
+      return;
+    }
+
+    if (!page) dispatcher.getData(cookie.pageId);
+    else dispatcher.getData(page?._id);
     dispatcher.setTabValue(1);
   }, []);
 
@@ -117,7 +129,6 @@ function Organizer() {
     setOpenAddDialog(false);
     setOpenDeleteDialog(false);
     setOpenEntityDialog(false);
-    setTabIndex(page.entities.length - 1);
     setNewType(page.entities[page.entities.length - 1].label);
   }, [page]);
 
@@ -173,7 +184,7 @@ function Organizer() {
   function of() {
     if (entity && entity._id)
       return (
-        <>
+        <Box margin="1em">
           <Grid container direction="column">
             <div className={classes.root}>
               <Tabs
@@ -196,7 +207,10 @@ function Organizer() {
 
               <TabPanel index={0} value={tabIndex}>
                 <OrganizerComponents.GeneralOptions entity={entity} />
-                <OrganizerComponents.Expiration entity={entity} />
+                <OrganizerComponents.Expiration
+                  entity={entity}
+                  key={JSON.stringify(entity)}
+                />
               </TabPanel>
 
               {entity.properties.map((p, i) => {
@@ -232,13 +246,13 @@ function Organizer() {
             color="primary"
             onClick={() => {
               dispatcher.updateEntity(entity, entity.properties);
-              dispatcher.setTabValue(0);
+              history.push(`/${entity._id}`);
             }}
             style={{ marginTop: "1em" }}
           >
             Speichern
           </Button>
-        </>
+        </Box>
       );
     return null;
   }
@@ -267,7 +281,6 @@ function Organizer() {
     setNewPropName("");
     setNewType("");
     setOpenAddDialog(false);
-    setTabIndex(entity.properties.length - 1);
   };
 
   const handleAddEntity = () => {

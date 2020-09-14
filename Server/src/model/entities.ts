@@ -28,6 +28,7 @@ export interface Expiration {
   expireType: ExpireType;
   offsetType: TimeOffset;
   offset: number;
+  expireProp?: string;
 }
 
 export interface Page {

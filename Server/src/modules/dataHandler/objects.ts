@@ -91,6 +91,19 @@ const remove = async (entObjId: string, referent: string) => {
   );
 };
 
+const expire = async (entObjId: string, referent: string) => {
+  await db.update(
+    config.database,
+    config.collections.objects,
+    {
+      $set: {
+        distribution: { status: DistributionStatus.EXPIRED, referent }
+      }
+    },
+    { _id: new ObjectId(entObjId) }
+  );
+};
+
 export default {
   get,
   getByEntity,
@@ -99,5 +112,6 @@ export default {
   deliver,
   book,
   clear,
-  remove
+  remove,
+  expire
 };

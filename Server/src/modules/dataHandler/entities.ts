@@ -4,29 +4,30 @@ import objects from "./objects";
 import pages from "./pages";
 import { db, config } from "./utils";
 
-async function get(filter = {}, open = false) {
+async function get(filter = {}, open = false, skipObjects = false) {
   const entities = await db.get<Entity>(
     config.database,
     config.collections.entities,
     filter
   );
 
-  for (const e of entities) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let objFilter: any = { _id: { $in: e.items } };
-    if (open)
-      objFilter = {
-        ...objFilter,
-        "distribution.status": {
-          $nin: [
-            DistributionStatus.DELETED,
-            DistributionStatus.DELIVERED,
-            DistributionStatus.EXPIRED
-          ]
-        }
-      };
-    e.items = await objects.get(objFilter);
-  }
+  if (!skipObjects)
+    for (const e of entities) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let objFilter: any = { _id: { $in: e.items } };
+      if (open)
+        objFilter = {
+          ...objFilter,
+          "distribution.status": {
+            $nin: [
+              DistributionStatus.DELETED,
+              DistributionStatus.DELIVERED,
+              DistributionStatus.EXPIRED
+            ]
+          }
+        };
+      e.items = await objects.get(objFilter);
+    }
 
   return entities;
 }
@@ -74,4 +75,11 @@ async function update(id: string, entity: Entity) {
   );
 }
 
-export default { get, update, create };
+async function getByObjectId(objectId: string) {
+  const filter = { items: { $in: [new ObjectId(objectId)] } };
+  const entities = await get(filter, false, true);
+  if (entities.length === 0) throw new Error("Entitiy not found");
+  return entities[0];
+}
+
+export default { get, update, create, getByObjectId };

@@ -4,14 +4,31 @@ import { Button, Grid, MenuItem, Select } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, StaticRouter, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
+import io from "socket.io-client";
+import Cookies from "universal-cookie";
 import { TableComponents } from "../../components";
 import { ChipData } from "../../components/TableComponents/Filter";
-import { EntityObject } from "../../model/interface";
+import api from "../../config/api.json";
+import { EntityObject, EntityType } from "../../model/interface";
 import { ApplicationState } from "../../store";
 import { dispatcher as IoDispatcher } from "../../store/io";
 import { conditionalRowStyle } from "./handlers";
-import Cookies from "universal-cookie";
+
+function doSocketStuff(
+  pageId: string,
+  refreshHandler: (entityId: string) => void
+) {
+  const socket = io(api.socketServer, {
+    path: "/catcher"
+  });
+
+  socket.on("connect", () => {
+    socket.emit("join", pageId);
+  });
+
+  socket.on("refresh", refreshHandler);
+}
 
 const EntityTable = () => {
   const dispatch = useDispatch();
@@ -57,10 +74,14 @@ const EntityTable = () => {
     dispatcher.setReferent(cookie.referent);
     dispatcher.clearEntity();
     dispatcher.setTabValue(0);
+
+    doSocketStuff(cookie.pageId, (eid) => {
+      if (entityId === eid) dispatcher.getEntity(eid);
+    });
   }, []);
 
   React.useEffect(() => {
-    if (entityId) {
+    if (entityId && page) {
       if (!page?.entities.some((e) => e._id === entityId)) {
         history.push("/not/found/");
         return;
@@ -68,7 +89,7 @@ const EntityTable = () => {
       dispatcher.getEntity(entityId);
     }
     setLoading(true);
-  }, [entityId]);
+  }, [entityId, page]);
 
   React.useEffect(() => {
     if (!entity) return;
@@ -82,6 +103,7 @@ const EntityTable = () => {
 
   React.useEffect(() => {
     if (insertSuccess && entity?._id) {
+      setOpenDialog(false);
       dispatcher.setInsertSuccess(false);
       dispatcher.getEntity(entity?._id);
       setLoading(true);
@@ -155,22 +177,48 @@ const EntityTable = () => {
         pagination
       />
 
-      <TableComponents.TDialog.Simple
-        entity={entity}
-        open={openDialog}
-        referent={referent}
-        selectedObjectId={selectedObjectId}
-        closeHandler={(state) => {
-          setOpenDialog(state);
-        }}
-        deleteHandler={(objectId) => {
-          dispatcher.remove(objectId, referent);
-        }}
-        editHandler={(objectId) => {
-          if (!entity) return;
-          history.push(`insert/${entity._id}/${objectId}`);
-        }}
-      />
+      {entity?.options.type === EntityType.SIMPLE && (
+        <TableComponents.TDialog.Simple
+          entity={entity}
+          open={openDialog}
+          referent={referent}
+          selectedObjectId={selectedObjectId}
+          closeHandler={(state) => {
+            setOpenDialog(state);
+          }}
+          deleteHandler={(objectId) => {
+            dispatcher.remove(objectId, referent);
+          }}
+          editHandler={(objectId) => {
+            if (!entity) return;
+            history.push(`insert/${entity._id}/${objectId}`);
+          }}
+        />
+      )}
+
+      {entity?.options.type === EntityType.REDISTRIBUTE && (
+        <TableComponents.TDialog.Redist
+          entity={entity}
+          open={openDialog}
+          referent={referent}
+          selectedObjectId={selectedObjectId}
+          closeHandler={(state) => {
+            setOpenDialog(state);
+          }}
+          deleteHandler={(objectId) => {
+            dispatcher.remove(objectId, referent);
+          }}
+          bookHandler={(objectId) => {
+            dispatcher.book(objectId, referent);
+          }}
+          clearHandler={(objectId) => {
+            dispatcher.clear(objectId, referent);
+          }}
+          deliverHandler={(objectId) => {
+            dispatcher.deliver(objectId, referent);
+          }}
+        />
+      )}
     </div>
   );
 };

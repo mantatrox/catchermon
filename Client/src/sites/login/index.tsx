@@ -117,7 +117,6 @@ function LoginPage() {
             { path: "/", expires: oneYearFromNow }
           );
 
-          console.log(pageId);
           dispatcher.setReferent(referent);
           dispatcher.setPageId(pageId);
           history.push("/");

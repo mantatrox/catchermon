@@ -1,3 +1,4 @@
 {
-  "baseUrl": "http://auent14.aue.helios-kliniken.de/catcher/api/"
+  "baseUrl": "http://auent14.aue.helios-kliniken.de/catcher/api/",
+  "socketServer": "http://auent14.aue.helios-kliniken.de/"
 }

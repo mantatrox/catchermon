@@ -8,7 +8,6 @@ function Draw(props: { entity: Entity }) {
   const [selected, setSelected] = React.useState(EntityType.SIMPLE);
 
   React.useEffect(() => {
-    console.log(props.entity.options.type);
     setSelected(props.entity.options.type);
   }, []);
 

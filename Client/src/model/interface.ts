@@ -14,6 +14,7 @@ export interface Expiration {
   expireType: ExpireType;
   offsetType: TimeOffset;
   offset: number;
+  expireProp?: string;
 }
 
 export interface Entity {
@@ -87,8 +88,13 @@ export interface StateReturn {
   propName: string;
 }
 
-export interface ListProp extends Property {
+export interface ListPropCategory {
+  category: string;
   items: string[];
+}
+
+export interface ListProp extends Property {
+  items: ListPropCategory[];
   expandable: boolean;
   multiple_choice: boolean;
 }

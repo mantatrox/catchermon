@@ -54,9 +54,6 @@ function Draw(props: {
         onKeyUp={(event) => {
           if (event.key === "Enter") setOpen(true);
         }}
-        onClick={() => {
-          setOpen(true);
-        }}
         open={open}
         onClick={() => setOpen(true)}
         onChange={handleDateChange}

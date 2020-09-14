@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -16,30 +17,50 @@ import {
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import { Add, Delete } from "@material-ui/icons";
 import React, { useState } from "react";
+import { ListPropCategory } from "../../model/interface";
 
 function ListInput(props: {
   label: string;
-  items: string[];
-  setHandler(items: string[]): any;
+  items: ListPropCategory[];
+  setHandler(items: ListPropCategory[]): any;
 }) {
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<ListPropCategory[]>([]);
   const [open, setOpen] = useState(false);
   const [newItem, setNewItem] = useState("");
+  const [newCategpry, setNewCategory] = useState("");
 
   React.useEffect(() => {
     setItems(props.items);
   }, []);
+
+  React.useEffect(() => {
+    if (!items) return;
+    props.setHandler(items);
+  }, [items]);
 
   const handleDialogClose = () => {
     setOpen(false);
   };
 
   const handleAdd = () => {
-    if (newItem === "" || items.some((i) => i === newItem)) return;
-    items.push(newItem);
+    if (
+      newItem === "" ||
+      items.some(
+        (i) => i.category === newCategpry && i.items.some((u) => u === newItem)
+      )
+    )
+      return;
+
+    const ncname = newCategpry === "" ? "none" : newCategpry;
+    const cat = items.find((i) => i.category === ncname);
+
+    if (cat) cat.items.push(newItem);
+    else items.push({ category: ncname, items: [newItem] });
+
     setItems(items);
-    props.setHandler(items);
+
     setNewItem("");
+    setNewCategory("");
     handleDialogClose();
   };
 
@@ -49,24 +70,40 @@ function ListInput(props: {
         {props.label}
       </Typography>
       <List>
-        {items.map((i) => {
+        {items.map((item) => {
           return (
-            <ListItem>
-              <ListItemText primary={i} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => {
-                    const ne = items.filter((u) => u !== i);
-                    setItems(ne);
-                    props.setHandler(ne);
-                  }}
-                >
-                  <Delete />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            <Box key={`${item.category}b`}>
+              {item.category !== "none" ? (
+                <ListItem key={item.category}>
+                  <ListItemText primary={item.category} />
+                </ListItem>
+              ) : null}
+
+              {item.items.map((it) => {
+                return (
+                  <ListItem key={`${item.category}_${it}`}>
+                    <ListItemText primary={it} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => {
+                          item.items = item.items.filter((fi) => fi !== it);
+                          if (item.items.length === 0) {
+                            const ne = items.filter(
+                              (i) => i.category !== item.category
+                            );
+                            setItems([...ne]);
+                          } else setItems([...items]);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                );
+              })}
+            </Box>
           );
         })}
         <ListItem>
@@ -95,8 +132,22 @@ function ListInput(props: {
             margin="dense"
             fullWidth
             value={newItem}
+            label="Listenelement"
             onChange={(event) => {
               setNewItem(event.target.value);
+            }}
+            onKeyUp={(event) => {
+              if (event.key === "Enter") handleAdd();
+            }}
+          />
+
+          <TextField
+            margin="dense"
+            fullWidth
+            value={newCategpry}
+            label="Kategorie"
+            onChange={(event) => {
+              setNewCategory(event.target.value);
             }}
             onKeyUp={(event) => {
               if (event.key === "Enter") handleAdd();

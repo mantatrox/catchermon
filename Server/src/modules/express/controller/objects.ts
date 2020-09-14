@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import { PostObject, EntityObject } from "../../../model/entities";
 import { dataHandler } from "../../index";
 import { sendBadRequest, sendInternalServerError, sendOK } from "./utils";
+import { emitChange } from "../socket";
 
 interface Delivery {
   objectId: string;
@@ -46,6 +47,10 @@ const create: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.create(body.entityId, body.item);
+    console.log(body.entityId);
+    const pageId = (await dataHandler.pages.getByEntityId(body.entityId))._id;
+    emitChange(pageId, body.entityId);
+
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -80,6 +85,8 @@ const update: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.update(body);
+    const pageId = (await dataHandler.pages.getByEntityId(body._id))._id;
+    emitChange(pageId, body._id);
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -99,6 +106,11 @@ const book: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.book(body.objectId, body.referent);
+    const entityId = (await dataHandler.entities.getByObjectId(body.objectId))
+      ._id;
+    const pageId = (await dataHandler.pages.getByEntityId(entityId))._id;
+    emitChange(pageId, entityId);
+
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -118,6 +130,10 @@ const deliver: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.deliver(body.objectId, body.referent);
+    const entityId = (await dataHandler.entities.getByObjectId(body.objectId))
+      ._id;
+    const pageId = (await dataHandler.pages.getByEntityId(entityId))._id;
+    emitChange(pageId, entityId);
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -137,6 +153,10 @@ const clear: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.clear(body.objectId);
+    const entityId = (await dataHandler.entities.getByObjectId(body.objectId))
+      ._id;
+    const pageId = (await dataHandler.pages.getByEntityId(entityId))._id;
+    emitChange(pageId, entityId);
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);
@@ -156,6 +176,10 @@ const remove: RequestHandler = async (req, res) => {
     }
 
     await dataHandler.objects.remove(body.objectId, body.referent);
+    const entityId = (await dataHandler.entities.getByObjectId(body.objectId))
+      ._id;
+    const pageId = (await dataHandler.pages.getByEntityId(entityId))._id;
+    emitChange(pageId, entityId);
     sendOK(res);
   } catch (error) {
     sendInternalServerError(res);

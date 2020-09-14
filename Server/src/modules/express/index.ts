@@ -4,6 +4,8 @@ import { json, urlencoded } from "body-parser";
 import router from "./router";
 import cors from "cors";
 import morgan from "morgan";
+import http from "http";
+import { serve } from "./socket";
 
 const app = express();
 
@@ -24,7 +26,6 @@ app.get("/", (_, res) => {
 });
 
 export default function (port: number) {
-  app.listen(port, () => {
-    console.log("Champ, your server is running! Port:", port);
-  });
+  const server = http.createServer(app);
+  serve(server, port);
 }
