@@ -19,9 +19,7 @@ function doSocketStuff(
   pageId: string,
   refreshHandler: (entityId: string) => void
 ) {
-  const socket = io(api.socketServer, {
-    path: "/catcher"
-  });
+  const socket = io(`${api.socketServer}`, { path: "/catcher/socket.io" });
 
   socket.on("connect", () => {
     socket.emit("join", pageId);

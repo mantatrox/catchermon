@@ -26,6 +26,9 @@ function DrawListElements(props: ListProp) {
       );
     }
 
+  if (!cat || cat.length === 0) return elements;
+  console.log(cat);
+
   for (const element of cat) {
     elements.push(
       <ListSubheader key={`lsh_${element.category}`}>

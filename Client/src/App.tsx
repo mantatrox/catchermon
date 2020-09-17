@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { AppBar, Tab, Tabs } from "@material-ui/core";
+import { AppBar, Box, Button, Tab, Tabs, Typography } from "@material-ui/core";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Switch, useHistory } from "react-router-dom";
 import Cookies from "universal-cookie";
 import "./App.css";
+import { SimpleComponents } from "./components";
 import {
   EntityTable,
   InsertMask,
@@ -20,9 +21,10 @@ function App() {
   const dispatch = useDispatch();
   const dispatcher = IoDispatcher(dispatch);
 
-  const { tabValue } = useSelector((state: ApplicationState) => {
+  const { tabValue, referent } = useSelector((state: ApplicationState) => {
     return {
-      tabValue: state.io.tabValue
+      tabValue: state.io.tabValue,
+      referent: state.io.referent
     };
   });
 
@@ -65,6 +67,22 @@ function App() {
         <Tabs value={tabValue} onChange={onChangeTabs}>
           <Tab label="Home" />
           <Tab label="Organizer" />
+          <Box marginLeft="auto" marginRight="1em">
+            <SimpleComponents.Hider hidden={referent === ""}>
+              <Typography>Eingeloggt als: {referent}</Typography>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  cookies.remove("page");
+                  dispatcher.setReferent("");
+                  history.push("/login");
+                }}
+              >
+                Logout
+              </Button>
+            </SimpleComponents.Hider>
+          </Box>
         </Tabs>
       </AppBar>
 

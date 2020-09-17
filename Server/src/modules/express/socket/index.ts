@@ -23,7 +23,7 @@ function emitChange(pageId: string, entityId: string) {
 }
 
 function serve(server: http.Server, port: number) {
-  io = socketio(server, { origins: "*:*", path: "/catcher" });
+  io = socketio(server, { origins: "*:*" });
   bindEvents();
 
   server.listen(port, () => {
